@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>实时策略看板</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --text: #0f172a;
+      --muted: #5b677a;
+      --line: #d8e0ea;
+      --good: #0b8f55;
+      --warn: #b66a00;
+      --head: #0b355e;
+      --accent: #0f5fa8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 0% 0%, #dfeefe 0%, transparent 35%),
+        radial-gradient(circle at 100% 100%, #e7f6ef 0%, transparent 35%),
+        var(--bg);
+      color: var(--text);
+      font-family: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+    .wrap {
+      width: min(1400px, 95vw);
+      margin: 18px auto 30px;
+      display: grid;
+      gap: 14px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+      overflow: hidden;
+    }
+    .head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(120deg, #f8fbff 0%, #f3f8ff 65%, #edf6ff 100%);
+    }
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      color: var(--head);
+      margin: 0;
+    }
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fcfdff;
+    }
+    input[type="date"], input[type="number"], input[type="text"] {
+      border: 1px solid #c6d3e4;
+      border-radius: 10px;
+      padding: 8px 10px;
+      min-height: 36px;
+      background: #fff;
+      color: var(--text);
+    }
+    button {
+      border: 0;
+      border-radius: 10px;
+      min-height: 36px;
+      padding: 0 12px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      cursor: pointer;
+    }
+    button.secondary {
+      background: #3e4d63;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .row-btn {
+      min-height: 30px;
+      padding: 0 10px;
+      font-size: 12px;
+      border-radius: 8px;
+      background: #2f6fb4;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 26px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: #234;
+      background: #edf5ff;
+      border: 1px solid #d5e5ff;
+    }
+    .table-wrap {
+      overflow: auto;
+      max-height: 62vh;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1180px;
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #f1f6fd;
+      color: #113a63;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.35px;
+      border-bottom: 1px solid #d0deee;
+      padding: 9px 8px;
+      white-space: nowrap;
+    }
+    tbody td {
+      border-bottom: 1px solid #ebf0f7;
+      padding: 8px;
+      font-size: 13px;
+      white-space: nowrap;
+      text-align: center;
+    }
+    tbody tr:nth-child(even) { background: #fbfdff; }
+    .ok { color: var(--good); font-weight: 700; }
+    .warn { color: var(--warn); font-weight: 700; }
+    .empty {
+      padding: 26px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 7px;
+      border-radius: 999px;
+      border: 1px solid #d2deea;
+      background: #f6f9fd;
+      font-size: 12px;
+      line-height: 1.5;
+      margin: 1px;
+    }
+    .risk-low {
+      color: #0b8f55;
+      border-color: #b8e6d2;
+      background: #ecfaf3;
+      font-weight: 700;
+    }
+    .risk-mid {
+      color: #b66a00;
+      border-color: #f4d7a8;
+      background: #fff7ea;
+      font-weight: 700;
+    }
+    .risk-high {
+      color: #a11a1a;
+      border-color: #f3c0c0;
+      background: #fff0f0;
+      font-weight: 700;
+    }
+    details.trigger-box {
+      display: block;
+      border: 1px solid #d7e2ee;
+      border-radius: 8px;
+      padding: 4px 6px;
+      background: #fbfdff;
+    }
+    details.trigger-box summary {
+      cursor: pointer;
+      color: #35506d;
+      font-size: 12px;
+      user-select: none;
+      margin-bottom: 4px;
+    }
+    .trigger-list {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+    }
+    .status {
+      padding: 10px 16px;
+      border-top: 1px solid var(--line);
+      background: #fafcff;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    @media (max-width: 800px) {
+      .title { font-size: 16px; }
+      .toolbar { gap: 8px; }
+      button, input[type="date"], input[type="number"] { min-height: 34px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="panel">
+      <div class="head">
+        <h1 class="title">实时策略分析</h1>
+        <div class="muted" id="meta">初始化中...</div>
+      </div>
+
+      <div class="toolbar">
+        <span class="badge">功能1：按日期查看</span>
+        <input id="dateInput" type="date" />
+        <button id="loadDateBtn" class="secondary">查看指定日期</button>
+        <input id="matchIdInput" type="text" placeholder="指定比赛ID，如 3042882 或逗号分隔" style="min-width:260px;" />
+        <button id="loadDateMatchBtn" class="secondary">查看指定日期+比赛ID</button>
+
+        <span class="badge">功能2：自动刷新当前比赛</span>
+        <button id="refreshNowBtn">立即刷新当前进行中</button>
+        <button id="refreshMatchBtn">刷新指定比赛ID</button>
+        <label class="muted">
+          刷新间隔(秒)
+          <input id="intervalInput" type="number" min="10" max="600" value="45" style="width:90px;margin-left:6px;" />
+        </label>
+        <label class="muted" style="display:inline-flex;align-items:center;gap:6px;">
+          <input id="autoRefreshChk" type="checkbox" /> 自动刷新
+        </label>
+        <span class="badge">功能3：信号筛选</span>
+        <label class="muted" style="display:inline-flex;align-items:center;gap:6px;">
+          <input id="highValueOnlyChk" type="checkbox" checked /> 仅显示高价值信号
+        </label>
+      </div>
+
+      <div class="table-wrap" id="tableWrap">
+        <table id="resultTable" style="display:none;">
+          <thead>
+            <tr>
+              <th>match_id</th>
+              <th>home</th>
+              <th>away</th>
+              <th>latest_min</th>
+              <th>终场角球</th>
+              <th>预测结果</th>
+              <th>latest_line</th>
+              <th>latest_pred</th>
+              <th>p_under</th>
+              <th>p_push</th>
+              <th>p_over</th>
+              <th>triggered</th>
+              <th>trigger_min</th>
+              <th>trigger_line</th>
+              <th>推荐区间</th>
+              <th>触发次数</th>
+              <th>稳定性</th>
+              <th>trigger_side</th>
+              <th>trigger_prob</th>
+              <th>first_entry</th>
+              <th>risk_flag</th>
+              <th>risk_alert</th>
+              <th>hedge_point</th>
+              <th>opp_conf_max</th>
+              <th>all_triggers</th>
+              <th>action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div id="emptyView" class="empty">暂无数据</div>
+      </div>
+
+      <div class="status" id="statusText">等待加载...</div>
+    </section>
+  </div>
+
+  <script>
+    const state = {
+      timer: null,
+      mode: "current",
+      lastPayload: null,
+    };
+
+    function fmtNum(v, d = 4) {
+      const n = Number(v);
+      return Number.isFinite(n) ? n.toFixed(d) : "-";
+    }
+
+    function fmtDateInput(yyyymmdd) {
+      if (!yyyymmdd || String(yyyymmdd).length !== 8) return "";
+      const s = String(yyyymmdd);
+      return `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`;
+    }
+
+    function todayInput() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function toYYYYMMDD(v) {
+      return String(v || "").replace(/-/g, "").trim();
+    }
+
+    function escHtml(s) {
+      return String(s ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function getMatchIdInput() {
+      return String(document.getElementById("matchIdInput")?.value || "").trim();
+    }
+
+    function hasValidMatchIdInput() {
+      const s = getMatchIdInput();
+      if (!s) return false;
+      return s.split(",").every((part) => /^\d{6,10}$/.test(part.trim()));
+    }
+
+    function fmtRisk(flag) {
+      if (flag == null || Number.isNaN(Number(flag))) return '<span class="small">-</span>';
+      const n = Number(flag);
+      const cls = n >= 3 ? "risk-high" : (n >= 2 ? "risk-mid" : "risk-low");
+      return `<span class="pill ${cls}">${n}</span>`;
+    }
+
+    function fmtRiskAlert(flag, text) {
+      if (!flag) return '<span class="pill risk-low">none</span>';
+      return `<span class="pill risk-high" title="${escHtml(text || 'risk alert')}">${escHtml(text || 'alert')}</span>`;
+    }
+
+    function fmtPredictionResult(r) {
+      // 只有已结束且有触发信号的比赛才显示结果
+      if (!r.is_finished || !r.triggered || r.final_total_corners == null) {
+        return '<span class="small">-</span>';
+      }
+      const side = r.pred_side;
+      const line = parseFloat(r.line);
+      const final = parseInt(r.final_total_corners);
+
+      if (side === 'under') {
+        if (final < line) return '<span class="ok">✅ 正确</span>';
+        else if (final > line) return '<span class="warn">❌ 错误</span>';
+        else return '<span class="muted">⚖️ 走水</span>';
+      } else { // over
+        if (final > line) return '<span class="ok">✅ 正确</span>';
+        else if (final < line) return '<span class="warn">❌ 错误</span>';
+        else return '<span class="muted">⚖️ 走水</span>';
+      }
+    }
+
+    function fmtHedge(r) {
+      if (!r?.hedge_recommended) return '<span class="small">-</span>';
+      const m = r?.hedge_minute ?? '-';
+      const side = r?.hedge_side || '-';
+      const line = r?.hedge_line != null ? fmtNum(r.hedge_line, 1) : '-';
+      const p = r?.hedge_prob != null ? fmtNum(r.hedge_prob) : '-';
+      return `<span class="pill risk-mid">${m}' ${escHtml(side)} ${line} (${p})</span>`;
+    }
+
+    function fmtTriggerSummary(r) {
+      if (!r?.triggered || !r?.trigger_summary) {
+        return {
+          interval: '<span class="small">-</span>',
+          count: '<span class="small">-</span>',
+          stability: '<span class="small">-</span>'
+        };
+      }
+      const summary = r.trigger_summary;
+      const side = summary.dominant_side || '';
+      const interval = summary.trigger_interval || [];
+      const count = summary.trigger_count || 0;
+      const stability = summary.stability_rating || 'low';
+
+      let stabilityCls = 'risk-high';
+      if (stability === 'high') stabilityCls = 'risk-low';
+      else if (stability === 'medium') stabilityCls = 'risk-mid';
+
+      const stabilityText = {
+        'high': '高',
+        'medium': '中',
+        'low': '低'
+      }[stability] || stability;
+
+      return {
+        interval: interval.length === 2
+          ? `<span class="pill">${interval[0]}-${interval[1]} ${escHtml(side)}</span>`
+          : '<span class="small">-</span>',
+        count: `<span class="pill">${count}</span>`,
+        stability: `<span class="pill ${stabilityCls}">${stabilityText}</span>`
+      };
+    }
+
+    function fmtAllTriggers(list) {
+      if (!Array.isArray(list) || !list.length) return '<span class="small">-</span>';
+      const rows = list.map((t, idx) => {
+        const m = t?.start_minute ?? "-";
+        const em = t?.end_minute ?? "-";
+        const side = t?.side || "-";
+        const line = t?.line != null ? fmtNum(t.line, 1) : "-";
+        const p = t?.pred_prob != null ? fmtNum(t.pred_prob) : "-";
+        return `<span class="pill">#${idx + 1} ${m}'-${em}' ${escHtml(side)} ${line} (${p})</span>`;
+      });
+      return `<details class="trigger-box"><summary>共 ${list.length} 个 triggers（点击展开）</summary><div class="trigger-list">${rows.join("")}</div></details>`;
+    }
+
+    function setStatus(msg) {
+      const el = document.getElementById("statusText");
+      if (el) el.textContent = msg;
+    }
+
+    function setMeta(msg) {
+      const el = document.getElementById("meta");
+      if (el) el.textContent = msg;
+    }
+
+    function render(payload, sourceLabel) {
+      state.lastPayload = payload;
+      let rows = Array.isArray(payload?.rows) ? payload.rows : [];
+
+      // 高价值信号筛选
+      const highValueOnly = document.getElementById("highValueOnlyChk").checked;
+      if (highValueOnly) {
+        rows = rows.filter(r => {
+          // 高价值信号条件：已触发 + 触发次数≥2 + 置信度≥0.88 + 风险分≤2
+          if (!r.triggered) return false;
+          const triggerCount = r.trigger_summary?.trigger_count || 0;
+          const prob = r.pred_prob || 0;
+          const risk = r.risk_flag || 999;
+          return triggerCount >= 2 && prob >= 0.88 && risk <= 2;
+        });
+      }
+
+      const table = document.getElementById("resultTable");
+      const body = document.querySelector("#resultTable tbody");
+      const empty = document.getElementById("emptyView");
+      body.innerHTML = "";
+
+      if (!rows.length) {
+        table.style.display = "none";
+        empty.style.display = "block";
+        const feedCount = payload?.feed_live_match_count;
+        const note = payload?.note || "";
+        if (state.mode === "current") {
+          if (typeof feedCount === "number" && feedCount > 0) {
+            empty.textContent = `当前源识别到 ${feedCount} 场进行中比赛，但暂时没有可用策略结果。${note ? " " + note : ""}`;
+          } else {
+            empty.textContent = note || "当前没有比赛";
+          }
+        } else {
+          empty.textContent = note || "指定日期无数据";
+        }
+      } else {
+        table.style.display = "table";
+        empty.style.display = "none";
+
+        rows.forEach((r) => {
+          const tr = document.createElement("tr");
+          const actionHtml = state.mode === "current"
+            ? `<button class="row-btn" data-action="refresh-row" data-match-id="${escHtml(r.match_id || "")}">刷新本场</button>`
+            : '<span class="small">-</span>';
+          tr.innerHTML = `
+            <td>${r.match_id || "-"}</td>
+            <td>${r.home_team_name || "-"}</td>
+            <td>${r.away_team_name || "-"}</td>
+            <td>${r.latest_minute ?? "-"}</td>
+            <td>${r.final_total_corners ?? "-"}</td>
+            <td>${fmtPredictionResult(r)}</td>
+            <td>${r.latest_line != null ? fmtNum(r.latest_line, 1) : "-"}</td>
+            <td class="${r.latest_pred === "over" ? "warn" : "ok"}">${r.latest_pred || "-"}</td>
+            <td>${r.latest_p_under != null ? fmtNum(r.latest_p_under) : "-"}</td>
+            <td>${r.latest_p_push != null ? fmtNum(r.latest_p_push) : "-"}</td>
+            <td>${r.latest_p_over != null ? fmtNum(r.latest_p_over) : "-"}</td>
+            <td>${r.triggered ? "yes" : "no"}</td>
+            <td>${r.triggered ? (r.trigger_minute ?? "-") : "-"}</td>
+            <td>${r.triggered ? (r.line != null ? fmtNum(r.line, 1) : "-") : "-"}</td>
+            ${(() => {
+              const ts = fmtTriggerSummary(r);
+              return `
+                <td>${ts.interval}</td>
+                <td>${ts.count}</td>
+                <td>${ts.stability}</td>
+              `;
+            })()}
+            <td>${r.triggered ? (r.pred_side || "-") : "-"}</td>
+            <td>${r.triggered ? fmtNum(r.pred_prob) : "-"}</td>
+            <td style="text-align:left; white-space:normal; min-width: 170px;">${r.first_entry_text ? escHtml(r.first_entry_text) : "-"}</td>
+            <td>${fmtRisk(r.risk_flag)}</td>
+            <td style="text-align:left; white-space:normal; min-width: 230px;">${fmtRiskAlert(r.risk_alert, r.risk_alert_text)}</td>
+            <td style="text-align:left; white-space:normal; min-width: 200px;">${fmtHedge(r)}</td>
+            <td>${r.opp_conf_max_after != null ? fmtNum(r.opp_conf_max_after) : "-"}</td>
+            <td style="text-align:left; white-space:normal; min-width: 360px; max-width: 520px;">${fmtAllTriggers(r.all_triggers)}</td>
+            <td>${actionHtml}</td>
+          `;
+          body.appendChild(tr);
+        });
+      }
+
+      const generated = payload?.generated_at || "-";
+      const date = payload?.date || "-";
+      const count = payload?.match_count ?? 0;
+      const note = payload?.note || "";
+      setMeta(`来源: ${sourceLabel} | 日期: ${date} | 场次: ${count}`);
+      setStatus(`更新时间: ${generated} | ${note}`);
+    }
+
+    async function fetchJson(url, timeoutMs = 30000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      let resp;
+      try {
+        resp = await fetch(url, { cache: "no-store", signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
+      let payload = null;
+      try {
+        payload = await resp.json();
+      } catch (_) {
+        payload = { rows: [], note: "Invalid JSON response" };
+      }
+      if (!resp.ok) {
+        const msg = payload?.note || `HTTP ${resp.status}`;
+        throw new Error(msg);
+      }
+      return payload;
+    }
+
+    async function refreshCurrent() {
+      state.mode = "current";
+      const date = toYYYYMMDD(document.getElementById("dateInput").value);
+      const url = `/api/live/current?date=${encodeURIComponent(date || "")}`;
+      setStatus("正在刷新当前进行中比赛...");
+      const payload = await fetchJson(url, 12000);
+      render(payload, "current-live");
+    }
+
+    async function refreshSpecificCurrentMatch(matchId) {
+      const mid = String(matchId || getMatchIdInput()).trim();
+      if (!/^\d{6,10}(\s*,\s*\d{6,10})*$/.test(mid)) {
+        setStatus("请输入合法比赛ID，支持逗号分隔");
+        return;
+      }
+      state.mode = "current";
+      const date = toYYYYMMDD(document.getElementById("dateInput").value);
+      setStatus(`正在刷新指定比赛ID: ${mid} ...`);
+      const payload = await fetchJson(`/api/live/current?date=${encodeURIComponent(date || "")}&match_id=${encodeURIComponent(mid)}`, 12000);
+
+      if (!state.lastPayload || !Array.isArray(state.lastPayload.rows) || mid.includes(",")) {
+        render(payload, "current-live-match-id");
+        return;
+      }
+
+      const incoming = Array.isArray(payload.rows) ? payload.rows : [];
+      const existing = Array.isArray(state.lastPayload.rows) ? [...state.lastPayload.rows] : [];
+      const idx = existing.findIndex((r) => String(r?.match_id || "") === mid);
+      if (incoming.length) {
+        if (idx >= 0) {
+          existing[idx] = incoming[0];
+        } else {
+          existing.unshift(incoming[0]);
+        }
+      }
+
+      const merged = {
+        ...state.lastPayload,
+        generated_at: payload.generated_at,
+        note: payload.note,
+        rows: existing,
+        match_count: existing.length,
+      };
+      render(merged, "current-live");
+    }
+
+    async function loadByDate() {
+      state.mode = "date";
+      // 切换到历史模式时停止自动刷新
+      if (state.timer) {
+        clearInterval(state.timer);
+        state.timer = null;
+        document.getElementById("autoRefreshChk").checked = false;
+      }
+      const d = document.getElementById("dateInput").value;
+      const ymd = toYYYYMMDD(d);
+      if (!/^\d{8}$/.test(ymd)) {
+        setStatus("请选择合法日期");
+        return;
+      }
+      setStatus(`正在加载 ${ymd} 的策略结果...`);
+      const payload = await fetchJson(`/api/live/by-date?date=${encodeURIComponent(ymd)}`, 12000);
+      render(payload, "historical-date");
+    }
+
+    async function loadByDateMatchId() {
+      state.mode = "date";
+      // 切换到历史模式时停止自动刷新
+      if (state.timer) {
+        clearInterval(state.timer);
+        state.timer = null;
+        document.getElementById("autoRefreshChk").checked = false;
+      }
+      const d = document.getElementById("dateInput").value;
+      const ymd = toYYYYMMDD(d);
+      if (!/^\d{8}$/.test(ymd)) {
+        setStatus("请选择合法日期");
+        return;
+      }
+      if (!hasValidMatchIdInput()) {
+        setStatus("请输入合法比赛ID，支持逗号分隔");
+        return;
+      }
+      const matchId = getMatchIdInput();
+      setStatus(`正在加载 ${ymd} 的指定比赛ID: ${matchId} ...`);
+      const payload = await fetchJson(`/api/live/by-date?date=${encodeURIComponent(ymd)}&match_id=${encodeURIComponent(matchId)}`, 12000);
+      render(payload, "historical-date-match-id");
+    }
+
+    function resetTimer() {
+      if (state.timer) {
+        clearInterval(state.timer);
+        state.timer = null;
+      }
+      const auto = document.getElementById("autoRefreshChk").checked;
+      const sec = Number(document.getElementById("intervalInput").value || 45);
+      if (!auto) return;
+      const ms = Math.max(10, Math.min(600, sec)) * 1000;
+      state.timer = setInterval(() => {
+        // Auto refresh only for current mode.
+        if (state.mode === "current") {
+          refreshCurrent().catch((e) => setStatus(`自动刷新失败: ${e.message}`));
+        }
+      }, ms);
+    }
+
+    function bindEvents() {
+      document.getElementById("refreshNowBtn").addEventListener("click", () => {
+        refreshCurrent().catch((e) => setStatus(`刷新失败: ${e.message}`));
+      });
+      document.getElementById("refreshMatchBtn").addEventListener("click", () => {
+        refreshSpecificCurrentMatch().catch((e) => setStatus(`刷新指定比赛失败: ${e.message}`));
+      });
+      document.getElementById("loadDateBtn").addEventListener("click", () => {
+        loadByDate().catch((e) => setStatus(`加载失败: ${e.message}`));
+      });
+      document.getElementById("loadDateMatchBtn").addEventListener("click", () => {
+        loadByDateMatchId().catch((e) => setStatus(`按比赛ID加载失败: ${e.message}`));
+      });
+      document.getElementById("autoRefreshChk").addEventListener("change", resetTimer);
+      document.getElementById("intervalInput").addEventListener("change", resetTimer);
+      // 高价值信号开关切换时重新渲染
+      document.getElementById("highValueOnlyChk").addEventListener("change", () => {
+        if (state.lastPayload) {
+          render(state.lastPayload, "current");
+        }
+      });
+      document.getElementById("dateInput").addEventListener("change", () => {
+        // Just update input; mode switch remains explicit via buttons.
+      });
+      document.querySelector("#resultTable tbody").addEventListener("click", (e) => {
+        const target = e.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.dataset.action !== "refresh-row") return;
+        const matchId = String(target.dataset.matchId || "").trim();
+        if (!matchId) return;
+        refreshSpecificCurrentMatch(matchId).catch((err) => setStatus(`单场刷新失败: ${err.message}`));
+      });
+    }
+
+    async function bootstrap() {
+      document.getElementById("dateInput").value = todayInput();
+      bindEvents();
+      resetTimer();
+      // 页面加载不自动拉取数据，等用户主动操作
+      setStatus("页面加载完成，请选择操作：查看历史日期或刷新当前比赛");
+    }
+
+    bootstrap();
+  </script>
+</body>
+</html>

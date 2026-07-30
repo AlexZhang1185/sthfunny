@@ -1,0 +1,36 @@
+
+name: Generate and Deploy Static Dashboard
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '*/5 * * * *'  # 每5分钟运行一次，可根据需要调整频率
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4  # 主版本标签自动指向最新兼容版本
+      - name: Set up Python
+        uses: actions/setup-python@v5  # 主版本标签自动指向最新兼容版本
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate static data
+        run: python generate_static.py
+        env:
+          TZ: Asia/Shanghai  # 设置时区为中国时间
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./static
+          force_orphan: true  # 保持gh-pages分支干净

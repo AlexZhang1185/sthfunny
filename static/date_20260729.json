@@ -1,0 +1,10 @@
+{
+  "generated_at": "2026-07-30T13:57:44Z",
+  "strategy": "first_3x_08_any",
+  "source": "historical-jsonl",
+  "date": "20260729",
+  "note": "No records found for date 20260729.",
+  "feed_live_match_count": 0,
+  "match_count": 0,
+  "rows": []
+}
