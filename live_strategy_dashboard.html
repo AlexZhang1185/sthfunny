@@ -246,6 +246,10 @@
         <label class="muted" style="display:inline-flex;align-items:center;gap:6px;">
           <input id="highValueOnlyChk" type="checkbox" checked /> 仅显示高价值信号
         </label>
+
+        <span class="badge">功能4：手动更新</span>
+        <button id="manualRefreshBtn" style="background: #0b8f55;">🔄 立即刷新最新数据</button>
+        <button id="tokenSettingsBtn" class="secondary">⚙️ Token设置</button>
       </div>
 
       <div class="table-wrap" id="tableWrap">
@@ -287,6 +291,23 @@
 
       <div class="status" id="statusText">等待加载...</div>
     </section>
+  </div>
+
+  <!-- Token设置模态框 -->
+  <div id="tokenModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="panel" style="width: min(500px, 90vw); padding: 24px;">
+      <h3 style="margin-top: 0; color: var(--head);">GitHub Token 设置</h3>
+      <p class="muted" style="margin-bottom: 16px;">Token只存在你本地浏览器中，不会上传到任何服务器，安全可靠</p>
+      <input id="tokenInput" type="password" placeholder="输入你的GitHub Personal Access Token" style="width: 100%; margin-bottom: 16px;" />
+      <p class="small" style="color: var(--muted); margin-bottom: 16px;">
+        需要权限：仓库读写权限、Actions读写权限<br>
+        <a href="https://github.com/settings/tokens?type=beta" target="_blank" style="color: var(--accent);">点击创建Token</a> → 选择"Fine-grained token" → 仅授权本仓库 → 勾选"Actions: Read and write"
+      </p>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button id="cancelTokenBtn" class="secondary">取消</button>
+        <button id="saveTokenBtn">保存</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -687,10 +708,97 @@
       });
     }
 
+    // 一键刷新相关功能
+    function getGitHubToken() {
+      return localStorage.getItem("github_dashboard_token") || "";
+    }
+
+    function saveGitHubToken(token) {
+      localStorage.setItem("github_dashboard_token", token);
+    }
+
+    function showTokenModal() {
+      document.getElementById("tokenModal").style.display = "flex";
+      document.getElementById("tokenInput").value = getGitHubToken();
+    }
+
+    function hideTokenModal() {
+      document.getElementById("tokenModal").style.display = "none";
+    }
+
+    async function triggerManualRefresh() {
+      const token = getGitHubToken();
+      if (!token) {
+        setStatus("请先设置GitHub Token才能手动刷新");
+        showTokenModal();
+        return;
+      }
+
+      const confirmRefresh = confirm("确定要立即刷新最新比赛数据吗？大约需要2-3分钟完成。");
+      if (!confirmRefresh) return;
+
+      setStatus("正在触发数据刷新，请稍候...");
+      document.getElementById("manualRefreshBtn").disabled = true;
+
+      try {
+        const response = await fetch("https://api.github.com/repos/AlexZhang1185/sthfunny/actions/workflows/generate-static.yml/dispatches", {
+          method: "POST",
+          headers: {
+            "Accept": "application/vnd.github+json",
+            "Authorization": `Bearer ${token}`,
+            "X-GitHub-Api-Version": "2022-11-28"
+          },
+          body: JSON.stringify({
+            ref: "main"
+          })
+        });
+
+        if (response.ok) {
+          setStatus("✅ 刷新任务已触发，2-3分钟后页面将显示最新数据，你可以手动刷新页面查看");
+          // 30秒后自动刷新一次页面
+          setTimeout(() => {
+            if (state.mode === "current") {
+              refreshCurrent().catch(e => setStatus(`自动刷新失败: ${e.message}`));
+            }
+          }, 30000);
+        } else {
+          const error = await response.json();
+          setStatus(`❌ 刷新失败: ${error.message || "未知错误，请检查Token权限是否正确"}`);
+          if (response.status === 401 || response.status === 403) {
+            showTokenModal();
+          }
+        }
+      } catch (e) {
+        setStatus(`❌ 刷新失败: ${e.message}`);
+      } finally {
+        document.getElementById("manualRefreshBtn").disabled = false;
+      }
+    }
+
     async function bootstrap() {
       document.getElementById("dateInput").value = todayInput();
       bindEvents();
       resetTimer();
+      // 绑定一键刷新和Token设置事件
+      document.getElementById("manualRefreshBtn").addEventListener("click", triggerManualRefresh);
+      document.getElementById("tokenSettingsBtn").addEventListener("click", showTokenModal);
+      document.getElementById("cancelTokenBtn").addEventListener("click", hideTokenModal);
+      document.getElementById("saveTokenBtn").addEventListener("click", () => {
+        const token = document.getElementById("tokenInput").value.trim();
+        if (token) {
+          saveGitHubToken(token);
+          hideTokenModal();
+          setStatus("Token已保存，现在可以手动刷新数据了");
+        } else {
+          setStatus("请输入有效的Token");
+        }
+      });
+      // 点击模态框外部关闭
+      document.getElementById("tokenModal").addEventListener("click", (e) => {
+        if (e.target.id === "tokenModal") {
+          hideTokenModal();
+        }
+      });
       // 页面加载不自动拉取数据，等用户主动操作
       setStatus("页面加载完成，请选择操作：查看历史日期或刷新当前比赛");
     }
