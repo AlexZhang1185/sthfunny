@@ -60,7 +60,7 @@ def main():
         'const payload = await fetchJson(`date_${ymd}.json`, 12000)'
     )
 
-    # 移除单场刷新按钮相关功能（静态部署不支持），保留一键刷新功能
+    # 移除单场刷新按钮相关功能（静态部署不支持）
     html_content = html_content.replace(
         '<button id="refreshMatchBtn">刷新指定比赛ID</button>',
         '<button id="refreshMatchBtn" disabled>静态模式不支持</button>'
@@ -70,8 +70,6 @@ def main():
         '<button class="row-btn" data-action="refresh-row" data-match-id="${escHtml(r.match_id or "")}">刷新本场</button>',
         '<span class="small">-</span>'
     )
-
-    # 一键刷新功能不需要后端支持，直接调用GitHub API，静态页面中可正常使用
 
     # 写入静态HTML
     (static_dir / "index.html").write_text(html_content, encoding="utf-8")
