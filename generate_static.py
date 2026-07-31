@@ -17,6 +17,43 @@ def _empty_current(note: str) -> dict:
     }
 
 
+def _current_worker(q):
+    try:
+        from serve_dashboard import _build_current_live_payload as _blc
+        q.put(_blc())
+    except Exception as e:  # noqa: BLE001
+        q.put({"__error__": repr(e)})
+
+
+def _current_with_timeout(timeout_s: float) -> dict:
+    """在独立子进程里抓实时数据, 超时/异常一律返回空占位, 绝不拖垮构建。
+
+    子进程 terminate() 能硬杀掉抓取里的并发线程(线程级 join 做不到), 是可靠兜底。
+    """
+    import multiprocessing as mp
+    try:
+        ctx = mp.get_context("fork")   # CI(Linux) 支持; 子进程继承已加载的模型/模块
+    except ValueError:
+        ctx = mp.get_context()
+    q = ctx.Queue()
+    proc = ctx.Process(target=_current_worker, args=(q,), daemon=True)
+    proc.start()
+    proc.join(timeout_s)
+    if proc.is_alive():
+        proc.terminate()
+        proc.join()
+        print(f"current live timed out (>{int(timeout_s)}s), writing empty")
+        return _empty_current(f"current live timed out (>{int(timeout_s)}s)")
+    try:
+        r = q.get_nowait()
+    except Exception:
+        return _empty_current("current live no result")
+    if isinstance(r, dict) and "__error__" in r:
+        print(f"current live error: {r['__error__']}")
+        return _empty_current(f"current live error: {r['__error__']}")
+    return r
+
+
 def main():
     # 预加载模型，避免重复加载
     _load_model_bundle()
@@ -29,12 +66,8 @@ def main():
     # 故默认跳过并写空占位; 需要时设环境变量 GEN_CURRENT=1 才尝试抓取。
     import os
     if os.environ.get("GEN_CURRENT", "0") == "1":
-        print("Generating current live data...")
-        try:
-            current_payload = _build_current_live_payload()
-        except Exception as e:
-            print(f"current live failed, writing empty: {e}")
-            current_payload = _empty_current(f"current live unavailable: {e}")
+        print("Generating current live data (hard timeout 90s)...")
+        current_payload = _current_with_timeout(90)
     else:
         print("Skip current live data (set GEN_CURRENT=1 to enable).")
         current_payload = _empty_current("static build skips live fetch (set GEN_CURRENT=1)")
