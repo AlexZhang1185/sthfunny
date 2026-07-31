@@ -249,7 +249,7 @@ def _build_current_live_payload(date_yyyymmdd: str | None = None) -> dict[str, A
     date_str = date_yyyymmdd or datetime.now().strftime("%Y%m%d")
     try:
         # 延长超时时间到30秒，适配海外网络环境
-        feed_text = fetch_oldindexall_feed_text(timeout_s=30.0)
+        feed_text = fetch_oldindexall_feed_text(timeout_s=12.0)
         live_matches = extract_live_matches_from_feed(feed_text)
         live_ids = [x["match_id"] for x in live_matches]
     except Exception as e:
@@ -271,9 +271,9 @@ def _build_current_live_payload(date_yyyymmdd: str | None = None) -> dict[str, A
         date_str=date_str,
         out_jsonl=RAW_OUTPUT_NOW,
         company_id=8,
-        timeout_s=20.0,  # 延长超时时间适配海外网络
-        retries=2,       # 增加重试次数
-        backoff_s=0.5,
+        timeout_s=8.0,
+        retries=1,
+        backoff_s=0.3,
     )
 
     records = _load_jsonl(RAW_OUTPUT_NOW)
@@ -361,7 +361,7 @@ def _get_current_live_cached_or_start(date_str: str) -> dict[str, Any]:
 
     try:
         # 延长超时时间到20秒，适配海外网络环境
-        feed_text = fetch_oldindexall_feed_text(timeout_s=20.0)
+        feed_text = fetch_oldindexall_feed_text(timeout_s=4.0)
         live_matches = extract_live_matches_from_feed(feed_text)
     except Exception:
         live_matches = []
@@ -428,9 +428,9 @@ def _build_rows_payload_from_match_ids(date_str: str, match_ids: list[str], sour
             date_str=date_str,
             out_jsonl=tmp_path,
             company_id=8,
-            timeout_s=20.0,  # 延长超时时间适配海外网络
-            retries=2,       # 增加重试次数
-            backoff_s=0.5,
+            timeout_s=8.0,
+            retries=1,
+            backoff_s=0.3,
         )
         records = _load_jsonl(tmp_path)
         rows = build_live_strategy_rows(records, _load_model_bundle())

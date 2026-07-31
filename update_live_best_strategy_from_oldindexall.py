@@ -661,63 +661,46 @@ def crawl_live_matches_from_ids(
     timeout_s: float,
     retries: int,
     backoff_s: float,
-    max_workers: int = 10,
 ) -> dict[str, Any]:
-    """并发抓取多场进行中比赛。默认 10 路并发(每线程独立 thread-local client)。"""
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-
     Path(out_jsonl).write_text("", encoding="utf-8")
+
     written = 0
     rejects: dict[str, int] = {}
     total = len(match_ids)
 
-    def _work(mid: str):
-        rec = _fetch_one_match_raw(
-            match_id=str(mid),
-            date_str=str(date_str),
-            company_id=int(company_id),
-            timeout_s=float(timeout_s),
-            retries=max(1, int(retries)),
-            backoff_s=float(backoff_s),
-            jitter_s=(0.0, 0.12),
-            request_jitter_s=(0.0, 0.3),  # 并发已分散压力, 降低单请求抖动以提速
-        )
-        return str(mid), rec
-
-    workers = max(1, min(int(max_workers), total)) if total else 1
-    results: list[tuple[str, Any]] = []
-    with ThreadPoolExecutor(max_workers=workers) as ex:
-        futures = {ex.submit(_work, mid): str(mid) for mid in match_ids}
-        for fut in as_completed(futures):
-            mid = futures[fut]
-            try:
-                results.append(fut.result())
-            except Exception as e:  # 单场失败不影响其它并发任务
-                results.append((mid, None))
-                print(f"{mid} -> error: {e}")
-
-    # 结果统一在主线程写盘 (无需锁), 保持与串行版一致的 summary 结构
     with open(out_jsonl, "a", encoding="utf-8") as f:
-        for idx, (mid, rec) in enumerate(results, start=1):
+        for idx, mid in enumerate(match_ids, start=1):
+            rec = _fetch_one_match_raw(
+                match_id=str(mid),
+                date_str=str(date_str),
+                company_id=int(company_id),
+                timeout_s=float(timeout_s),
+                retries=max(1, int(retries)),
+                backoff_s=float(backoff_s),
+                jitter_s=(0.0, 0.12),
+                request_jitter_s=(0.6, 1.4),
+            )
+
             if not rec:
                 print(f"[{idx}/{total}] {mid} -> no data")
                 continue
+
             if bool(rec.get("_reject", False)):
                 reason = str(rec.get("reason", "unknown"))
                 rejects[reason] = int(rejects.get(reason, 0) + 1)
                 print(f"[{idx}/{total}] {mid} -> reject: {reason}")
                 continue
+
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
             f.flush()
             written += 1
             print(f"[{idx}/{total}] {mid} -> saved ({written})")
 
     return {
-        "mode": f"manual_match_ids_concurrent_{workers}",
+        "mode": "manual_match_ids_sequential",
         "submitted": total,
         "written": written,
         "reject_reasons": rejects,
-        "max_workers": workers,
         "date": str(date_str),
     }
 

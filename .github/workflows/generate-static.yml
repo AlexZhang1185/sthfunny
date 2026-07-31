@@ -34,7 +34,6 @@ jobs:
         env:
           TZ: Asia/Shanghai
           PYTHONUNBUFFERED: 1
-          GEN_CURRENT: "1"   # 构建时抓一份实时快照(generate_static 内置90s子进程硬超时, 抓不到写空不卡构建)
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
