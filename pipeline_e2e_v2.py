@@ -280,7 +280,11 @@ def _normalize_corner_row_cells(cells: list[str]) -> Optional[tuple[str, str, st
     c2 = str(cells[2]).strip()
     c3 = str(cells[3]).strip()
     c4 = str(cells[4]).strip()
+    # 支持7列格式（最后一列是状态）
     change_time_raw = str(cells[5]).strip()
+    if len(cells) >= 7 and not change_time_raw and str(cells[6]).strip():
+        # 如果第6列是空的，尝试使用第7列作为变化时间
+        change_time_raw = str(cells[6]).strip()
 
     # Candidate A: [minute, score, line, over, under, time]
     a_line = parse_asian_line(c2)
@@ -348,8 +352,15 @@ def clean_inplay_corner_rows(
                 change_time_raw=r.change_time_raw,
             )
 
+        # 放宽验证要求：对于没有比赛时间和比分的记录，只要盘口和赔率有效也保留
+        # 特别是对于刚刚开始的比赛
         if require_inplay_evidence and (not _is_valid_inplay_corner_row(row2, kickoff_dt=kickoff_dt)):
-            continue
+            # 即使没有时间和比分，只要有有效的盘口和赔率，也保留
+            line_v = parse_asian_line(row2.line_raw)
+            ov_v = parse_odds_value(row2.odds_over_raw)
+            un_v = parse_odds_value(row2.odds_under_raw)
+            if not (_is_plausible_corner_line(line_v) and ov_v is not None and un_v is not None):
+                continue
 
         line_v = parse_asian_line(row2.line_raw)
         ov_v = parse_odds_value(row2.odds_over_raw)
@@ -399,14 +410,17 @@ def _assess_market_rows_quality(rows: list[MarketRow]) -> tuple[bool, str, dict[
         "max_minute": int(max(minute_values)) if minute_values else None,
     }
 
-    if len(rows) < 6:
+    # 降低对进行中比赛的要求
+    # 对于刚开始的比赛，允许较少的行数和变化
+    if len(rows) < 3:  # 从6降低到3
         return False, "too_few_rows", stats
-    if unique_line_ticks < 3:
+    if unique_line_ticks < 1:  # 从3降低到1
         return False, "insufficient_line_variation", stats
     if valid_minutes == 0 and valid_scores == 0:
         return False, "no_minute_or_score", stats
-    if minute_values and max(minute_values) < 20:
-        return False, "too_early_timeline", stats
+    # 移除比赛时间过短的限制，允许刚开始的比赛
+    # if minute_values and max(minute_values) < 20:
+    #     return False, "too_early_timeline", stats
 
     return True, "ok", stats
 
@@ -1459,8 +1473,10 @@ def _fetch_one_match_raw(
     if final_total is None and inferred_totals:
         final_total = max(inferred_totals)
 
+    # 对于正在进行的比赛，如果没有最终角球数，使用当前最新的角球数
+    # 即使没有也不返回None，允许模型进行实时预测
     if final_total is None:
-        return None
+        final_total = 0  # 对于未结束的比赛，使用0作为占位符，模型预测时会忽略这个值
 
     home_team_name, away_team_name = client.fetch_match_teams(match_id)
  

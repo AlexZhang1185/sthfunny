@@ -248,6 +248,14 @@
         </label>
       </div>
 
+      <!-- 分段推荐区域 -->
+      <div id="segmentSection" style="display: none; padding: 16px; border-bottom: 1px solid var(--line); background: #fcfdff;">
+        <h3 style="margin: 0 0 12px 0; color: var(--head); font-size: 16px;">📊 各时间段高置信度推荐 <span style="font-size:12px;color:var(--muted);font-weight:400;">(🔒 触发即锁存, 不随时间丢弃; 百分比为本地全量历史正确率)</span></h3>
+        <div id="segmentCards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+          <!-- 时间段卡片会动态生成在这里 -->
+        </div>
+      </div>
+
       <div class="table-wrap" id="tableWrap">
         <table id="resultTable" style="display:none;">
           <thead>
@@ -439,6 +447,67 @@
       state.lastPayload = payload;
       let rows = Array.isArray(payload?.rows) ? payload.rows : [];
 
+      // 渲染各时间段高置信度推荐
+      const segmentSection = document.getElementById("segmentSection");
+      const segmentCards = document.getElementById("segmentCards");
+      const segmentPredictions = payload?.segment_predictions || [];
+
+      if (segmentPredictions.length > 0) {
+        segmentSection.style.display = "block";
+        segmentCards.innerHTML = "";
+
+        segmentPredictions.forEach(seg => {
+          const card = document.createElement("div");
+          card.className = "panel";
+          card.style.padding = "12px";
+          card.style.boxShadow = "0 4px 12px rgba(15,23,42,0.08)";
+
+          // 计算时间段胜率
+          const correctCount = seg.rows.filter(r => r.is_finished && r.pred_side &&
+            ((r.pred_side === "under" && r.final_total_corners < r.line) ||
+             (r.pred_side === "over" && r.final_total_corners > r.line))
+          ).length;
+          const totalCount = seg.rows.filter(r => r.is_finished).length;
+          const winRate = totalCount > 0 ? (correctCount / totalCount * 100).toFixed(1) : "-";
+
+          let headerHtml = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--line);">
+              <div style="font-weight: 700; color: var(--head); font-size: 15px;">🔒 ${seg.segment} 分钟</div>
+              <div style="font-size: 12px; color: var(--muted);">
+                ${seg.match_count} 个信号${seg.hist_accuracy != null ? ` | 历史正确率 ${(seg.hist_accuracy*100).toFixed(1)}%` : ''}
+                ${totalCount > 0 ? ` | 本样本胜率 ${winRate}%` : ''}
+              </div>
+            </div>
+            <div style="font-size: 12px; line-height: 1.6;">
+          `;
+
+          let rowsHtml = "";
+          seg.rows.forEach(r => {
+            const resultBadge = r.is_finished && r.pred_side ?
+              (r.pred_side === "under" && r.final_total_corners < r.line) ? '<span style="color: #0b8f55; font-weight: 700;">✅</span>' :
+              (r.pred_side === "over" && r.final_total_corners > r.line) ? '<span style="color: #0b8f55; font-weight: 700;">✅</span>' :
+              r.final_total_corners == r.line ? '<span style="color: #5b677a;">⚖️</span>' :
+              '<span style="color: #b66a00; font-weight: 700;">❌</span>' : '';
+
+            const finalText = r.is_finished ? ` (终场${r.final_total_corners}球)` : '';
+
+            rowsHtml += `
+              <div style="margin-bottom: 6px; padding: 4px 0; border-bottom: 1px dashed #eee;">
+                <div style="font-weight: 500;">${r.home_team_name} vs ${r.away_team_name} ${resultBadge}</div>
+                <div style="font-size: 11px; color: var(--muted);">
+                  ${r.trigger_minute}' 触发 ${r.pred_side} ${r.line} | 置信度 ${(r.pred_prob * 100).toFixed(1)}%${finalText}
+                </div>
+              </div>
+            `;
+          });
+
+          card.innerHTML = headerHtml + rowsHtml + "</div>";
+          segmentCards.appendChild(card);
+        });
+      } else {
+        segmentSection.style.display = "none";
+      }
+
       // 高价值信号筛选
       const highValueOnly = document.getElementById("highValueOnlyChk").checked;
       if (highValueOnly) {
@@ -525,7 +594,7 @@
       setStatus(`更新时间: ${generated} | ${note}`);
     }
 
-    async function fetchJson(url, timeoutMs = 30000) {
+    async function fetchJson(url, timeoutMs = 120000) {  // 超时时间从30秒增加到120秒
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       let resp;
@@ -608,7 +677,7 @@
         return;
       }
       setStatus(`正在加载 ${ymd} 的策略结果...`);
-      const payload = await fetchJson(`/api/live/by-date?date=${encodeURIComponent(ymd)}`, 12000);
+      const payload = await fetchJson(`/api/live/by-date?date=${encodeURIComponent(ymd)}`, 120000);
       render(payload, "historical-date");
     }
 
@@ -632,7 +701,7 @@
       }
       const matchId = getMatchIdInput();
       setStatus(`正在加载 ${ymd} 的指定比赛ID: ${matchId} ...`);
-      const payload = await fetchJson(`/api/live/by-date?date=${encodeURIComponent(ymd)}&match_id=${encodeURIComponent(matchId)}`, 12000);
+      const payload = await fetchJson(`/api/live/by-date?date=${encodeURIComponent(ymd)}&match_id=${encodeURIComponent(matchId)}`, 120000);
       render(payload, "historical-date-match-id");
     }
 

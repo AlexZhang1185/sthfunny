@@ -212,6 +212,39 @@ def _find_first_3x_08_any(df: pd.DataFrame) -> tuple[bool, int | None, str | Non
     return False, None, None, None, None, None
 
 
+def _find_first_sticky_trigger(df: pd.DataFrame, thr: float = 0.88):
+    """不预知(causal) + 锁存(sticky) 高置信触发。
+
+    从时间序列头部开始扫描，返回【第一个】满足"连续3个快照
+    max(p_under,p_over) >= thr 且方向一致"的三连点，用其【第一格】的
+    方向/盘口线/分钟作为信号。因为只用前缀信息，信号一旦出现就固定，
+    不会因为后续快照(方向翻转/风险变化)而改变或消失——天然锁存。
+
+    返回 (triggered, minute, side, prob, line, corners_so_far)。
+    """
+    if df.empty or len(df) < 3:
+        return False, None, None, None, None, None
+    pu = df["p_under"].to_numpy(dtype=float)
+    po = df["p_over"].to_numpy(dtype=float)
+    under = pu >= po
+    conf = np.where(under, pu, po)
+    minute = df["minute"].to_numpy()
+    line = df["line"].to_numpy()
+    corners = df["corners_so_far"].to_numpy()
+    for i in range(len(conf) - 2):
+        if (conf[i] >= thr and conf[i + 1] >= thr and conf[i + 2] >= thr
+                and under[i] == under[i + 1] and under[i + 1] == under[i + 2]):
+            return (
+                True,
+                int(minute[i]),
+                "under" if under[i] else "over",
+                float(conf[i]),
+                float(line[i]),
+                int(corners[i]),
+            )
+    return False, None, None, None, None, None
+
+
 def _collect_all_triggers(df: pd.DataFrame) -> list[dict[str, Any]]:
     if df.empty or len(df) < 3:
         return []
@@ -559,6 +592,10 @@ def build_live_strategy_rows(matches: list[dict[str, Any]], model_bundle: dict[s
                 }
             )
 
+        st_trig, st_min, st_side, st_prob, st_line, st_corners = _find_first_sticky_trigger(out, thr=0.88)
+        st_rel = _proxy_relation(final_proxy, st_line) if (st_trig and st_line is not None) else None
+        st_hit = bool(st_rel == st_side) if (st_rel is not None and st_side) else None
+
         rows.append(
             {
                 "match_id": str(m.get("match_id", "")),
@@ -600,6 +637,14 @@ def build_live_strategy_rows(matches: list[dict[str, Any]], model_bundle: dict[s
                 "final_total_proxy_from_page": final_proxy,
                 "final_relation_proxy": final_relation_proxy,
                 "hit_proxy": hit_proxy,
+                "sticky_triggered": bool(st_trig),
+                "sticky_minute": st_min,
+                "sticky_side": st_side,
+                "sticky_prob": round(float(st_prob), 4) if st_prob is not None else None,
+                "sticky_line": round(float(st_line), 1) if st_line is not None else None,
+                "sticky_corners_so_far": st_corners,
+                "sticky_relation": st_rel,
+                "sticky_hit": st_hit,
                 "minute_rows_last10": minute_rows_last10,
             }
         )
@@ -616,46 +661,63 @@ def crawl_live_matches_from_ids(
     timeout_s: float,
     retries: int,
     backoff_s: float,
+    max_workers: int = 10,
 ) -> dict[str, Any]:
-    Path(out_jsonl).write_text("", encoding="utf-8")
+    """并发抓取多场进行中比赛。默认 10 路并发(每线程独立 thread-local client)。"""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
 
+    Path(out_jsonl).write_text("", encoding="utf-8")
     written = 0
     rejects: dict[str, int] = {}
     total = len(match_ids)
 
-    with open(out_jsonl, "a", encoding="utf-8") as f:
-        for idx, mid in enumerate(match_ids, start=1):
-            rec = _fetch_one_match_raw(
-                match_id=str(mid),
-                date_str=str(date_str),
-                company_id=int(company_id),
-                timeout_s=float(timeout_s),
-                retries=max(1, int(retries)),
-                backoff_s=float(backoff_s),
-                jitter_s=(0.0, 0.12),
-                request_jitter_s=(0.6, 1.4),
-            )
+    def _work(mid: str):
+        rec = _fetch_one_match_raw(
+            match_id=str(mid),
+            date_str=str(date_str),
+            company_id=int(company_id),
+            timeout_s=float(timeout_s),
+            retries=max(1, int(retries)),
+            backoff_s=float(backoff_s),
+            jitter_s=(0.0, 0.12),
+            request_jitter_s=(0.0, 0.3),  # 并发已分散压力, 降低单请求抖动以提速
+        )
+        return str(mid), rec
 
+    workers = max(1, min(int(max_workers), total)) if total else 1
+    results: list[tuple[str, Any]] = []
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futures = {ex.submit(_work, mid): str(mid) for mid in match_ids}
+        for fut in as_completed(futures):
+            mid = futures[fut]
+            try:
+                results.append(fut.result())
+            except Exception as e:  # 单场失败不影响其它并发任务
+                results.append((mid, None))
+                print(f"{mid} -> error: {e}")
+
+    # 结果统一在主线程写盘 (无需锁), 保持与串行版一致的 summary 结构
+    with open(out_jsonl, "a", encoding="utf-8") as f:
+        for idx, (mid, rec) in enumerate(results, start=1):
             if not rec:
                 print(f"[{idx}/{total}] {mid} -> no data")
                 continue
-
             if bool(rec.get("_reject", False)):
                 reason = str(rec.get("reason", "unknown"))
                 rejects[reason] = int(rejects.get(reason, 0) + 1)
                 print(f"[{idx}/{total}] {mid} -> reject: {reason}")
                 continue
-
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
             f.flush()
             written += 1
             print(f"[{idx}/{total}] {mid} -> saved ({written})")
 
     return {
-        "mode": "manual_match_ids_sequential",
+        "mode": f"manual_match_ids_concurrent_{workers}",
         "submitted": total,
         "written": written,
         "reject_reasons": rejects,
+        "max_workers": workers,
         "date": str(date_str),
     }
 

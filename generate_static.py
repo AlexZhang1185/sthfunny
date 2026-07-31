@@ -51,12 +51,12 @@ def main():
     )
 
     html_content = html_content.replace(
-        'const payload = await fetchJson(`/api/live/by-date?date=${encodeURIComponent(ymd)}`, 12000)',
+        'const payload = await fetchJson(`/api/live/by-date?date=${encodeURIComponent(ymd)}`, 120000)',
         'const payload = await fetchJson(`date_${ymd}.json`, 12000)'
     )
 
     html_content = html_content.replace(
-        'const payload = await fetchJson(`/api/live/by-date?date=${encodeURIComponent(ymd)}&match_id=${encodeURIComponent(matchId)}`, 12000)',
+        'const payload = await fetchJson(`/api/live/by-date?date=${encodeURIComponent(ymd)}&match_id=${encodeURIComponent(matchId)}`, 120000)',
         'const payload = await fetchJson(`date_${ymd}.json`, 12000)'
     )
 

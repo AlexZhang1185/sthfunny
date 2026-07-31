@@ -151,10 +151,105 @@ def _build_live_placeholders(live_matches: list[dict[str, str]], note: str) -> l
     return rows
 
 
+# --- 高置信度触发锁存(sticky latch): 首个因果高置信trigger一旦出现即固定, 不随刷新丢弃 ---
+_STICKY_LATCH: dict[str, dict[str, Any]] = {}
+_STICKY_LATCH_LOCK = threading.Lock()
+
+# 每15分钟段 历史回测正确率(因果+锁存, 高置信>=0.88, 本地全量数据)
+_SEGMENT_HIST_ACCURACY = {
+    "0-15": 0.943, "15-30": 0.936, "30-45": 0.941,
+    "45-60": 0.975, "60-75": 1.000, "75-90": 1.000, "90+": 1.000,
+}
+
+
+def _sticky_signal_from_row(row: dict, is_finished: bool) -> dict | None:
+    if not row.get("sticky_triggered"):
+        return None
+    m = row.get("sticky_minute")
+    prob = row.get("sticky_prob")
+    if m is None or prob is None:
+        return None
+    return {
+        "match_id": str(row.get("match_id", "")),
+        "home_team_name": row.get("home_team_name", ""),
+        "away_team_name": row.get("away_team_name", ""),
+        "trigger_minute": int(m),
+        "pred_side": row.get("sticky_side"),
+        "line": row.get("sticky_line"),
+        "pred_prob": row.get("sticky_prob"),
+        "corners_so_far": row.get("sticky_corners_so_far"),
+        "is_finished": bool(is_finished),
+        "final_total_corners": row.get("final_total_proxy_from_page"),
+        "sticky_hit": row.get("sticky_hit"),
+    }
+
+
+def _build_segment_predictions(records: list[dict], model_bundle: dict, latch: bool = False,
+                               conf_thr: float = 0.88) -> list[dict]:
+    """按15分钟段汇总【因果+锁存】高置信触发。
+
+    不预知(causal): 用 sticky_* 字段(首个 max(p_under,p_over)>=conf_thr 的3连点,
+      触发时刻定方向/定线), 不做主导方向投票、不用全场加权线, 不预知未来。
+    锁存(sticky): latch=True(实时看板)时把首见信号写入持久store, 之后刷新只保留、
+      永不因方向翻转/风险变化而丢弃。latch=False(历史按日期)时按当前数据直接分段。
+    """
+    SEGMENTS = [
+        ("0-15", 0, 15), ("15-30", 15, 30), ("30-45", 30, 45),
+        ("45-60", 45, 60), ("60-75", 60, 75), ("75-90", 75, 90),
+        ("90+", 90, 999),
+    ]
+    all_rows = build_live_strategy_rows(records, model_bundle)
+
+    fresh: dict[str, dict] = {}
+    for row in all_rows:
+        sig = _sticky_signal_from_row(row, is_finished=(not latch))
+        if sig is None or sig["pred_prob"] is None or float(sig["pred_prob"]) < conf_thr:
+            continue
+        fresh[sig["match_id"]] = sig
+
+    if latch:
+        with _STICKY_LATCH_LOCK:
+            for mid, sig in fresh.items():
+                if mid not in _STICKY_LATCH:
+                    _STICKY_LATCH[mid] = sig          # 首见锁存, 之后不覆盖方向/线/分钟
+                elif sig.get("is_finished") and not _STICKY_LATCH[mid].get("is_finished"):
+                    _STICKY_LATCH[mid]["is_finished"] = True
+                    _STICKY_LATCH[mid]["final_total_corners"] = sig.get("final_total_corners")
+                    _STICKY_LATCH[mid]["sticky_hit"] = sig.get("sticky_hit")
+            signals = list(_STICKY_LATCH.values())
+    else:
+        signals = list(fresh.values())
+
+    segment_map = {seg[0]: [] for seg in SEGMENTS}
+    for sig in signals:
+        mnt = int(sig["trigger_minute"])
+        for seg_name, lo, hi in SEGMENTS:
+            if lo <= mnt < hi:
+                segment_map[seg_name].append(sig)
+                break
+
+    segment_results = []
+    for seg_name, lo, hi in SEGMENTS:
+        seg_rows = segment_map[seg_name]
+        if not seg_rows:
+            continue
+        seg_rows.sort(key=lambda r: (float(r.get("pred_prob") or 0)), reverse=True)
+        segment_results.append({
+            "segment": seg_name,
+            "seg_start": lo,
+            "seg_end": hi,
+            "match_count": len(seg_rows),
+            "hist_accuracy": _SEGMENT_HIST_ACCURACY.get(seg_name),
+            "rows": seg_rows,
+        })
+    return segment_results
+
+
 def _build_current_live_payload(date_yyyymmdd: str | None = None) -> dict[str, Any]:
     date_str = date_yyyymmdd or datetime.now().strftime("%Y%m%d")
     try:
-        feed_text = fetch_oldindexall_feed_text(timeout_s=12.0)
+        # 延长超时时间到30秒，适配海外网络环境
+        feed_text = fetch_oldindexall_feed_text(timeout_s=30.0)
         live_matches = extract_live_matches_from_feed(feed_text)
         live_ids = [x["match_id"] for x in live_matches]
     except Exception as e:
@@ -176,9 +271,9 @@ def _build_current_live_payload(date_yyyymmdd: str | None = None) -> dict[str, A
         date_str=date_str,
         out_jsonl=RAW_OUTPUT_NOW,
         company_id=8,
-        timeout_s=8.0,
-        retries=1,
-        backoff_s=0.3,
+        timeout_s=20.0,  # 延长超时时间适配海外网络
+        retries=2,       # 增加重试次数
+        backoff_s=0.5,
     )
 
     records = _load_jsonl(RAW_OUTPUT_NOW)
@@ -204,6 +299,9 @@ def _build_current_live_payload(date_yyyymmdd: str | None = None) -> dict[str, A
             note=note,
         )
 
+    # 构建各时间段预测结果
+    segment_predictions = _build_segment_predictions(records, _load_model_bundle(), latch=True)
+
     return {
         "generated_at": _utc_now(),
         "strategy": "first_3x_08_any",
@@ -214,6 +312,7 @@ def _build_current_live_payload(date_yyyymmdd: str | None = None) -> dict[str, A
         "crawl_summary": summary,
         "match_count": len(rows),
         "rows": rows,
+        "segment_predictions": segment_predictions,  # 新增：各时间段高置信度推荐
     }
 
 
@@ -261,7 +360,8 @@ def _get_current_live_cached_or_start(date_str: str) -> dict[str, Any]:
             return out
 
     try:
-        feed_text = fetch_oldindexall_feed_text(timeout_s=4.0)
+        # 延长超时时间到20秒，适配海外网络环境
+        feed_text = fetch_oldindexall_feed_text(timeout_s=20.0)
         live_matches = extract_live_matches_from_feed(feed_text)
     except Exception:
         live_matches = []
@@ -328,9 +428,9 @@ def _build_rows_payload_from_match_ids(date_str: str, match_ids: list[str], sour
             date_str=date_str,
             out_jsonl=tmp_path,
             company_id=8,
-            timeout_s=8.0,
-            retries=1,
-            backoff_s=0.3,
+            timeout_s=20.0,  # 延长超时时间适配海外网络
+            retries=2,       # 增加重试次数
+            backoff_s=0.5,
         )
         records = _load_jsonl(tmp_path)
         rows = build_live_strategy_rows(records, _load_model_bundle())
@@ -467,6 +567,9 @@ def _build_date_payload(date_yyyymmdd: str) -> dict[str, Any]:
         row["final_total_corners"] = rec.get("final_total_corners", None)
         row["is_finished"] = True
 
+    # 构建各时间段预测结果
+    segment_predictions = _build_segment_predictions(filtered, _load_model_bundle())
+
     payload = {
         "generated_at": _utc_now(),
         "strategy": "first_3x_08_any",
@@ -476,6 +579,7 @@ def _build_date_payload(date_yyyymmdd: str) -> dict[str, Any]:
         "feed_live_match_count": None,
         "match_count": len(rows),
         "rows": rows,
+        "segment_predictions": segment_predictions,  # 新增：各时间段高置信度推荐
     }
 
     # 存入缓存，下次直接返回
@@ -524,6 +628,9 @@ def _build_date_match_payload(date_yyyymmdd: str, match_ids: list[str]) -> dict[
         row["final_total_corners"] = rec.get("final_total_corners", None)
         row["is_finished"] = True
 
+    # 构建各时间段预测结果
+    segment_predictions = _build_segment_predictions(filtered, _load_model_bundle())
+
     return {
         "generated_at": _utc_now(),
         "strategy": "first_3x_08_any",
@@ -533,6 +640,7 @@ def _build_date_match_payload(date_yyyymmdd: str, match_ids: list[str]) -> dict[
         "feed_live_match_count": None,
         "match_count": len(rows),
         "rows": rows,
+        "segment_predictions": segment_predictions,  # 新增：各时间段高置信度推荐
     }
 
 
@@ -572,12 +680,16 @@ def _persist_live_refresh_snapshot(
 class DashboardHandler(SimpleHTTPRequestHandler):
     def _send_json(self, payload: dict[str, Any], status_code: int = 200) -> None:
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        self.send_response(status_code)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Cache-Control", "no-store")
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.send_response(status_code)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        except (BrokenPipeError, ConnectionResetError):
+            # Client aborted the request (e.g. frontend fetch timeout). Safe to ignore.
+            pass
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)

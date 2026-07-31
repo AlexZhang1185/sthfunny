@@ -1,34 +1,46 @@
 
-name: Generate and Deploy Static Dashboard
+name: Generate and Deploy Static Dashboard (sthnew)
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:  # 仅允许手动触发（页面一键刷新/后台手动运行）
+    branches: [ sthnew ]
+  workflow_dispatch:  # 仅手动触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 5  # 最长5分钟超时，避免卡住浪费时长
     steps:
-      - uses: actions/checkout@v4  # 主版本标签自动指向最新兼容版本
+      - uses: actions/checkout@v4
+
       - name: Set up Python
-        uses: actions/setup-python@v5  # 主版本标签自动指向最新兼容版本
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
+          cache: 'pip'  # 缓存依赖，第二次运行不用重新安装
+          cache-dependency-path: requirements.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install --no-cache-dir -r requirements.txt
 
-      - name: Generate static data
-        run: python generate_static.py
+      - name: Generate static data (auto-retry 3 times)
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 2
+          max_attempts: 3  # 网络超时自动重试3次，提高成功率
+          retry_on: error
+          command: python generate_static.py
         env:
-          TZ: Asia/Shanghai  # 设置时区为中国时间
+          TZ: Asia/Shanghai
+          PYTHONUNBUFFERED: 1
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./static
-          force_orphan: true  # 保持gh-pages分支干净
+          destination_dir: sthnew   # 部署到 /sthnew/ 子路径, 与 main 根路径的展示页互不冲突
+          keep_files: true          # 保留 gh-pages 上其它文件, 不整盘覆盖 main 的页面
+          force_orphan: false
+          enable_jekyll: false  # 禁用Jekyll处理，加快部署速度
