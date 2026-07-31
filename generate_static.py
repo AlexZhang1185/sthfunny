@@ -4,6 +4,19 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from serve_dashboard import _build_current_live_payload, _build_date_payload, _load_model_bundle
 
+def _empty_current(note: str) -> dict:
+    return {
+        "generated_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "strategy": "first_3x_08_any",
+        "source": "static-build",
+        "note": note,
+        "feed_live_match_count": 0,
+        "match_count": 0,
+        "rows": [],
+        "segment_predictions": [],
+    }
+
+
 def main():
     # 预加载模型，避免重复加载
     _load_model_bundle()
@@ -12,9 +25,19 @@ def main():
     static_dir = Path("static")
     static_dir.mkdir(exist_ok=True)
 
-    # 生成当前实时数据
-    print("Generating current live data...")
-    current_payload = _build_current_live_payload()
+    # 生成当前实时数据: 依赖实时网络(titan007), 在 CI 上慢/不可达易超时,
+    # 故默认跳过并写空占位; 需要时设环境变量 GEN_CURRENT=1 才尝试抓取。
+    import os
+    if os.environ.get("GEN_CURRENT", "0") == "1":
+        print("Generating current live data...")
+        try:
+            current_payload = _build_current_live_payload()
+        except Exception as e:
+            print(f"current live failed, writing empty: {e}")
+            current_payload = _empty_current(f"current live unavailable: {e}")
+    else:
+        print("Skip current live data (set GEN_CURRENT=1 to enable).")
+        current_payload = _empty_current("static build skips live fetch (set GEN_CURRENT=1)")
     (static_dir / "current.json").write_text(
         json.dumps(current_payload, ensure_ascii=False, indent=2),
         encoding="utf-8"
