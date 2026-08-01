@@ -1,0 +1,111 @@
+{
+  "raw_files": [
+    "data/monthly/raw_matches_202601_W1.jsonl",
+    "data/monthly/raw_matches_202601_W2.jsonl",
+    "data/monthly/raw_matches_202601_W3.jsonl",
+    "data/monthly/raw_matches_202601_W4.jsonl",
+    "data/monthly/raw_matches_202601_W5.jsonl",
+    "data/monthly/raw_matches_202602_W1.jsonl",
+    "data/monthly/raw_matches_202602_W2.jsonl",
+    "data/monthly/raw_matches_202602_W3.jsonl",
+    "data/monthly/raw_matches_202602_W4.jsonl",
+    "data/monthly/raw_matches_202602_W5.jsonl",
+    "data/monthly/raw_matches_202603_W1.jsonl",
+    "data/monthly/raw_matches_202603_W2.jsonl",
+    "data/monthly/raw_matches_202603_W3.jsonl",
+    "data/monthly/raw_matches_202603_W4.jsonl",
+    "data/monthly/raw_matches_202604.jsonl",
+    "data/monthly/raw_matches_202605.jsonl",
+    "data/monthly/raw_matches_202606.jsonl",
+    "data/monthly/raw_matches_202607.jsonl",
+    "data/monthly/raw_matches_live_oldindexall_with_teams.jsonl"
+  ],
+  "matches": 19952,
+  "samples": 1587140,
+  "unique_matches": 19944,
+  "feature_count": 38,
+  "class_balance": {
+    "under": 0.4828364227478357,
+    "push": 0.08352445278929395,
+    "over": 0.43363912446287034
+  },
+  "split": {
+    "train_samples": 1269883,
+    "test_samples": 317257,
+    "train_matches": 15955,
+    "test_matches": 3989
+  },
+  "metrics": {
+    "samples": 317257,
+    "acc": 0.7148746914961687,
+    "logloss": 0.6170112927785908,
+    "auc_ovr": 0.8538118251200116,
+    "precision": {
+      "under": 0.7205619412515964,
+      "push": 0.36767230806965906,
+      "over": 0.7179676412148737
+    },
+    "recall": {
+      "under": 0.8127287608446554,
+      "push": 0.05682765941314732,
+      "over": 0.7323421688839991
+    },
+    "confusion_matrix": [
+      [
+        124124,
+        1254,
+        27347
+      ],
+      [
+        12482,
+        1499,
+        12397
+      ],
+      [
+        35654,
+        1324,
+        101176
+      ]
+    ]
+  },
+  "feature_columns": [
+    "minute",
+    "corners_so_far",
+    "line",
+    "line_gap",
+    "p_mkt_over",
+    "odds_log_ratio",
+    "delta_line",
+    "delta_p_mkt_over",
+    "divergence_sign",
+    "steps_up_20m",
+    "steps_down_20m",
+    "reversal_flag_2",
+    "reversal_depth",
+    "reversal_time",
+    "corners_last_5m",
+    "corners_last_10m",
+    "corners_last_15m",
+    "rate_10m",
+    "time_since_last_corner",
+    "line_rank_in_match",
+    "minute_progress",
+    "corners_progress",
+    "line_minus_corners",
+    "line_minus_final_proxy",
+    "is_second_half",
+    "is_late_game",
+    "is_integer_line",
+    "is_half_line",
+    "distance_to_int",
+    "distance_to_half",
+    "corner_rate_10m",
+    "corner_rate_5m",
+    "corner_rate_2m",
+    "second_half_corners_so_far",
+    "second_half_corner_rate",
+    "second_half_3_4_flag",
+    "second_half_0_2_flag",
+    "second_half_5plus_flag"
+  ]
+}

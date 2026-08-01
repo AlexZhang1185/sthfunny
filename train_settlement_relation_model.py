@@ -141,7 +141,11 @@ def _build_settlement_dataset(matches: list[dict[str, Any]]) -> pd.DataFrame:
             second_half_5plus_flag=(second_half_corners >= 5).astype(int),
         )
 
-        keep_cols = ["match_id", "minute", "line", "corners_so_far", "final_total_corners", "target_settlement"] + SETTLEMENT_FEATURE_COLS
+        # 去重: minute/line/corners_so_far 已在 SETTLEMENT_FEATURE_COLS 中, 避免重复列(否则 X 会变 41 列)
+        keep_cols = list(dict.fromkeys(
+            ["match_id", "minute", "line", "corners_so_far", "final_total_corners", "target_settlement"]
+            + SETTLEMENT_FEATURE_COLS
+        ))
         feat_df = feat_df.assign(final_total_corners=final_total)[keep_cols]
         frame_parts.append(feat_df)
 
