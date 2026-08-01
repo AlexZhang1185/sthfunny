@@ -2,8 +2,8 @@
   "generated_at": "2026-08-01T00:07:37Z",
   "strategy": "first_3x_08_any",
   "source": "historical-jsonl",
-  "date": "20260731",
-  "note": "No records found for date 20260731.",
+  "date": "20260801",
+  "note": "No records found for month 202608.",
   "feed_live_match_count": 0,
   "match_count": 0,
   "rows": []
