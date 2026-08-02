@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10  # 放宽以容纳串行抓取全部进行中场次 + 部署
+    timeout-minutes: 15  # 端到端最长15分钟
     steps:
       - uses: actions/checkout@v4
 
@@ -27,14 +27,14 @@ jobs:
       - name: Generate static data (auto-retry 3 times)
         uses: nick-fields/retry@v3
         with:
-          timeout_minutes: 6   # 容纳 current 串行抓取(约60场~4分钟)
+          timeout_minutes: 15   # 端到端最长15分钟
           max_attempts: 3  # 网络超时自动重试3次，提高成功率
           retry_on: error
           command: python generate_static.py
         env:
           TZ: Asia/Shanghai
           PYTHONUNBUFFERED: 1
-          CURRENT_BUDGET_S: "300"   # current 抓取时间预算(秒), 覆盖~60场; 到点返回已抓部分, 仍<retry的6分钟
+          CURRENT_BUDGET_S: "840"   # current 抓取时间预算14分钟, 抓完全部场次(仍<retry的15分钟), 到点才返回已抓部分
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
