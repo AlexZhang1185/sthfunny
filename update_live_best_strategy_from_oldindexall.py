@@ -45,6 +45,43 @@ def _clean_html_text(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
+def _extract_kickoff_time_from_fields(fields: list[str]) -> str:
+    # oldIndexall feed uses index 11 in current schema; keep fallback for older variants.
+    for idx in (11, 4):
+        if len(fields) <= idx:
+            continue
+        val = _clean_html_text(fields[idx])
+        if re.fullmatch(r"\d{1,2}:\d{2}", val):
+            return val
+
+    for raw in fields[:20]:
+        val = _clean_html_text(raw)
+        if re.fullmatch(r"\d{1,2}:\d{2}", val):
+            return val
+    return ""
+
+
+def _extract_score_part(raw: str) -> str:
+    val = _clean_html_text(raw)
+    if re.fullmatch(r"\d{1,2}", val):
+        return val
+    m = re.search(r"(\d{1,2})", val)
+    return m.group(1) if m else ""
+
+
+def _extract_current_score_from_fields(fields: list[str]) -> str:
+    # Current schema puts home/away score at indexes 14/15.
+    candidates = [(14, 15), (6, 9)]
+    for i_home, i_away in candidates:
+        if len(fields) <= max(i_home, i_away):
+            continue
+        h = _extract_score_part(fields[i_home])
+        a = _extract_score_part(fields[i_away])
+        if h and a:
+            return f"{h}-{a}"
+    return ""
+
+
 def extract_live_matches_from_feed(feed_text: str) -> list[dict[str, str]]:
     pat = re.compile(r"A\[\d+\]=\"(.*?)\"\.split\('\^'\);?", flags=re.S)
     out: list[dict[str, str]] = []
@@ -67,14 +104,18 @@ def extract_live_matches_from_feed(feed_text: str) -> list[dict[str, str]]:
         seen.add(match_id)
 
         league_name = _clean_html_text(fields[2] if len(fields) > 2 else "")
+        kickoff_time = _extract_kickoff_time_from_fields(fields)
         home_team = _clean_html_text(fields[5] if len(fields) > 5 else "")
         away_team = _clean_html_text(fields[8] if len(fields) > 8 else "")
+        current_score = _extract_current_score_from_fields(fields)
 
         out.append(
             {
                 "match_id": match_id,
                 "state": state,
                 "league_name": league_name,
+                "kickoff_time": kickoff_time,
+                "current_score": current_score,
                 "home_team_feed": home_team,
                 "away_team_feed": away_team,
             }
@@ -661,15 +702,31 @@ def crawl_live_matches_from_ids(
     timeout_s: float,
     retries: int,
     backoff_s: float,
+    time_budget_s: float | None = None,
 ) -> dict[str, Any]:
-    Path(out_jsonl).write_text("", encoding="utf-8")
+    """串行抓取多场进行中比赛(不使用任何线程)。
 
+    time_budget_s: 可选时间预算(秒)。串行抓取累计耗时超过预算时提前停止,
+    返回已抓到的部分结果, 保证调用方(如前端)不会因抓太久超时而拿到空白。
+    """
+    import time as _time
+
+    Path(out_jsonl).write_text("", encoding="utf-8")
     written = 0
     rejects: dict[str, int] = {}
     total = len(match_ids)
+    processed = 0
+    stopped_early = False
+    start = _time.monotonic()
 
     with open(out_jsonl, "a", encoding="utf-8") as f:
         for idx, mid in enumerate(match_ids, start=1):
+            if time_budget_s is not None and (_time.monotonic() - start) >= float(time_budget_s):
+                stopped_early = True
+                print(f"[{idx}/{total}] time budget {time_budget_s}s reached, stopping early "
+                      f"(processed {processed}, written {written})")
+                break
+            processed += 1
             rec = _fetch_one_match_raw(
                 match_id=str(mid),
                 date_str=str(date_str),
@@ -678,19 +735,16 @@ def crawl_live_matches_from_ids(
                 retries=max(1, int(retries)),
                 backoff_s=float(backoff_s),
                 jitter_s=(0.0, 0.12),
-                request_jitter_s=(0.6, 1.4),
+                request_jitter_s=(0.0, 0.25),
             )
-
             if not rec:
                 print(f"[{idx}/{total}] {mid} -> no data")
                 continue
-
             if bool(rec.get("_reject", False)):
                 reason = str(rec.get("reason", "unknown"))
                 rejects[reason] = int(rejects.get(reason, 0) + 1)
                 print(f"[{idx}/{total}] {mid} -> reject: {reason}")
                 continue
-
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
             f.flush()
             written += 1
@@ -699,8 +753,11 @@ def crawl_live_matches_from_ids(
     return {
         "mode": "manual_match_ids_sequential",
         "submitted": total,
+        "processed": processed,
         "written": written,
         "reject_reasons": rejects,
+        "stopped_early": stopped_early,
+        "time_budget_s": time_budget_s,
         "date": str(date_str),
     }
 

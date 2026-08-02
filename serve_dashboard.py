@@ -44,6 +44,7 @@ _CURRENT_CACHE: dict[str, dict[str, Any]] = {}
 _CURRENT_REFRESHING: set[str] = set()
 _CURRENT_LOCK = threading.Lock()
 CURRENT_CACHE_TTL_SECONDS = 45.0
+FORCE_TIME_BUDGET_S = 800.0  # 手动强制刷新的串行抓取时间预算(秒), 到点返回已抓部分, 避免前端超时空白
 LIVE_REFRESH_SNAPSHOT_DIR = "data/live_refresh_snapshots"
 # 历史数据缓存
 _HISTORY_CACHE: dict[str, dict[str, Any]] = {}  # 按日期缓存预测结果
@@ -108,6 +109,10 @@ def _build_live_placeholders(live_matches: list[dict[str, str]], note: str) -> l
                 "match_id": str(item.get("match_id", "")),
                 "home_team_name": str(item.get("home_team_feed", "") or ""),
                 "away_team_name": str(item.get("away_team_feed", "") or ""),
+                "league_name": str(item.get("league_name", "") or ""),
+                "kickoff_time": str(item.get("kickoff_time", "") or ""),
+                "current_score": str(item.get("current_score", "") or ""),
+                "current_corner_score": None,
                 "latest_minute": None,
                 "latest_line": None,
                 "latest_corners_so_far": None,
@@ -151,6 +156,31 @@ def _build_live_placeholders(live_matches: list[dict[str, str]], note: str) -> l
     return rows
 
 
+def _extract_latest_corner_score(record: dict[str, Any]) -> str | None:
+    market_rows = record.get("market_rows") or []
+    for rr in reversed(market_rows):
+        raw = str(rr.get("score_raw", "") or "").strip()
+        if not raw:
+            continue
+        m = re.search(r"(\d+)\s*[-:\uFF1A]\s*(\d+)", raw)
+        if m:
+            return f"{m.group(1)}-{m.group(2)}"
+        m2 = re.search(r"(\d+)\D+(\d+)", raw)
+        if m2:
+            return f"{m2.group(1)}-{m2.group(2)}"
+
+    # Fallback: if side split is unavailable, expose total corners to avoid fake "0-0".
+    for rr in reversed(market_rows):
+        total = rr.get("corners_so_far")
+        if total is None:
+            continue
+        try:
+            return f"总{int(total)}"
+        except Exception:
+            continue
+    return None
+
+
 # --- 高置信度触发锁存(sticky latch): 首个因果高置信trigger一旦出现即固定, 不随刷新丢弃 ---
 _STICKY_LATCH: dict[str, dict[str, Any]] = {}
 _STICKY_LATCH_LOCK = threading.Lock()
@@ -173,6 +203,10 @@ def _sticky_signal_from_row(row: dict, is_finished: bool) -> dict | None:
         "match_id": str(row.get("match_id", "")),
         "home_team_name": row.get("home_team_name", ""),
         "away_team_name": row.get("away_team_name", ""),
+        "league_name": row.get("league_name", ""),
+        "kickoff_time": row.get("kickoff_time", ""),
+        "current_score": row.get("current_score", ""),
+        "current_corner_score": row.get("current_corner_score", None),
         "trigger_minute": int(m),
         "pred_side": row.get("sticky_side"),
         "line": row.get("sticky_line"),
@@ -185,7 +219,7 @@ def _sticky_signal_from_row(row: dict, is_finished: bool) -> dict | None:
 
 
 def _build_segment_predictions(records: list[dict], model_bundle: dict, latch: bool = False,
-                               conf_thr: float = 0.88) -> list[dict]:
+                               conf_thr: float = 0.88, live_meta_by_match: dict[str, dict[str, Any]] | None = None) -> list[dict]:
     """按15分钟段汇总【因果+锁存】高置信触发。
 
     不预知(causal): 用 sticky_* 字段(首个 max(p_under,p_over)>=conf_thr 的3连点,
@@ -199,13 +233,24 @@ def _build_segment_predictions(records: list[dict], model_bundle: dict, latch: b
         ("90+", 90, 999),
     ]
     all_rows = build_live_strategy_rows(records, model_bundle)
+    record_map = {str(r.get("match_id", "")): r for r in records}
+    live_meta_by_match = live_meta_by_match or {}
 
     fresh: dict[str, dict] = {}
     for row in all_rows:
         sig = _sticky_signal_from_row(row, is_finished=(not latch))
         if sig is None or sig["pred_prob"] is None or float(sig["pred_prob"]) < conf_thr:
             continue
-        fresh[sig["match_id"]] = sig
+        mid = str(sig.get("match_id", ""))
+        live_meta = live_meta_by_match.get(mid, {})
+        rec = record_map.get(mid, {})
+        if live_meta:
+            sig["league_name"] = str(live_meta.get("league_name", "") or sig.get("league_name", "") or "")
+            sig["kickoff_time"] = str(live_meta.get("kickoff_time", "") or sig.get("kickoff_time", "") or "")
+            sig["current_score"] = str(live_meta.get("current_score", "") or sig.get("current_score", "") or "")
+        if sig.get("current_corner_score") in (None, ""):
+            sig["current_corner_score"] = _extract_latest_corner_score(rec)
+        fresh[mid] = sig
 
     if latch:
         with _STICKY_LATCH_LOCK:
@@ -245,7 +290,7 @@ def _build_segment_predictions(records: list[dict], model_bundle: dict, latch: b
     return segment_results
 
 
-def _build_current_live_payload(date_yyyymmdd: str | None = None) -> dict[str, Any]:
+def _build_current_live_payload(date_yyyymmdd: str | None = None, time_budget_s: float | None = None) -> dict[str, Any]:
     date_str = date_yyyymmdd or datetime.now().strftime("%Y%m%d")
     try:
         # 延长超时时间到30秒，适配海外网络环境
@@ -274,10 +319,12 @@ def _build_current_live_payload(date_yyyymmdd: str | None = None) -> dict[str, A
         timeout_s=8.0,
         retries=1,
         backoff_s=0.3,
+        time_budget_s=time_budget_s,
     )
 
     records = _load_jsonl(RAW_OUTPUT_NOW)
     rows = build_live_strategy_rows(records, _load_model_bundle())
+    live_meta_by_match = {str(x.get("match_id", "")): x for x in live_matches}
 
     # 先建立match_id到原始记录的映射，避免顺序错位
     rec_map = {str(rec.get("match_id", "")): rec for rec in records}
@@ -286,6 +333,11 @@ def _build_current_live_payload(date_yyyymmdd: str | None = None) -> dict[str, A
     for row in rows:
         match_id = str(row.get("match_id", ""))
         rec = rec_map.get(match_id, {})
+        meta = live_meta_by_match.get(match_id, {})
+        row["league_name"] = str(meta.get("league_name", "") or "")
+        row["kickoff_time"] = str(meta.get("kickoff_time", "") or "")
+        row["current_score"] = str(meta.get("current_score", "") or "")
+        row["current_corner_score"] = _extract_latest_corner_score(rec)
         row["final_total_corners"] = rec.get("final_total_corners", None)
         # 实时比赛如果终场角球数存在说明已经结束
         row["is_finished"] = row["final_total_corners"] is not None
@@ -300,7 +352,12 @@ def _build_current_live_payload(date_yyyymmdd: str | None = None) -> dict[str, A
         )
 
     # 构建各时间段预测结果
-    segment_predictions = _build_segment_predictions(records, _load_model_bundle(), latch=True)
+    segment_predictions = _build_segment_predictions(
+        records,
+        _load_model_bundle(),
+        latch=True,
+        live_meta_by_match=live_meta_by_match,
+    )
 
     return {
         "generated_at": _utc_now(),
@@ -335,7 +392,7 @@ def _refresh_current_cache(date_str: str) -> None:
             _CURRENT_REFRESHING.discard(date_str)
 
 
-def _get_current_live_cached_or_start(date_str: str) -> dict[str, Any]:
+def _get_current_live_cached_or_start(date_str: str, allow_background_refresh: bool = True) -> dict[str, Any]:
     now = time.time()
     with _CURRENT_LOCK:
         cached = _CURRENT_CACHE.get(date_str)
@@ -348,7 +405,7 @@ def _get_current_live_cached_or_start(date_str: str) -> dict[str, Any]:
                 out.pop("_cached_epoch", None)
                 return out
 
-        if not is_refreshing:
+        if allow_background_refresh and not is_refreshing:
             _CURRENT_REFRESHING.add(date_str)
             t = threading.Thread(target=_refresh_current_cache, args=(date_str,), daemon=True)
             t.start()
@@ -356,8 +413,18 @@ def _get_current_live_cached_or_start(date_str: str) -> dict[str, Any]:
         if cached is not None:
             out = dict(cached)
             out.pop("_cached_epoch", None)
-            out["note"] = f"Using cached live data while refreshing in background. {out.get('note', '')}".strip()
+            if allow_background_refresh:
+                out["note"] = f"Using cached live data while refreshing in background. {out.get('note', '')}".strip()
+            else:
+                out["note"] = f"Using cached live data only. {out.get('note', '')}".strip()
             return out
+
+    if not allow_background_refresh:
+        return _build_empty_payload(
+            source="oldIndexall/bfdata_ut.js",
+            date=date_str,
+            note="No cached live data yet. Click '立即刷新当前进行中' to run one refresh round.",
+        )
 
     try:
         # 延长超时时间到20秒，适配海外网络环境
@@ -678,6 +745,13 @@ def _persist_live_refresh_snapshot(
 
 
 class DashboardHandler(SimpleHTTPRequestHandler):
+    def end_headers(self) -> None:
+        # Prevent stale frontend JS/HTML from being reused after server-side refresh logic changes.
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
+
     def _send_json(self, payload: dict[str, Any], status_code: int = 200) -> None:
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         try:
@@ -708,7 +782,25 @@ class DashboardHandler(SimpleHTTPRequestHandler):
                     note=f"Computed by explicitly refreshing match ids: {', '.join(match_ids)}",
                 )
             else:
-                payload = _get_current_live_cached_or_start(date_str)
+                force = query.get("force", ["0"])[0] in ("1", "true", "yes")
+                if force:
+                    payload = _build_current_live_payload(date_str, time_budget_s=FORCE_TIME_BUDGET_S)
+                    with _CURRENT_LOCK:
+                        _CURRENT_CACHE[date_str] = _attach_cache_meta(payload)
+                    payload = dict(payload)
+                    payload["note"] = f"Refresh requested (one-shot). {payload.get('note', '')}".strip()
+                else:
+                    # 普通读取只返回缓存，不再隐式触发后台刷新，避免“点一次后持续自动刷新”。
+                    payload = _get_current_live_cached_or_start(date_str, allow_background_refresh=True)
+                    # 兼容旧前端：若未带 force 且当前日期缓存为空，则补一次同步刷新。
+                    # 这只会在该日期“首次无缓存”时触发，后续请求继续走纯缓存读取。
+                    if (payload.get("match_count") in (None, 0)
+                            and "No cached live data yet" in str(payload.get("note", ""))):
+                        payload = _build_current_live_payload(date_str)
+                        with _CURRENT_LOCK:
+                            _CURRENT_CACHE[date_str] = _attach_cache_meta(payload)
+                        payload = dict(payload)
+                        payload["note"] = f"Refresh requested (compat mode, cache bootstrap). {payload.get('note', '')}".strip()
 
             snapshot_path = _persist_live_refresh_snapshot(
                 payload=payload,

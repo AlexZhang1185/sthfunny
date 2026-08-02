@@ -14,7 +14,9 @@ def main():
 
     # 生成当前实时数据(与 main 一致: 串行抓取, 直接调用)
     print("Generating current live data...")
-    current_payload = _build_current_live_payload()
+    import os
+    _cur_budget = float(os.environ.get("CURRENT_BUDGET_S", "45"))  # CI 上限时间, 远小于 retry 的120s; 到点返回已抓部分
+    current_payload = _build_current_live_payload(time_budget_s=_cur_budget)
     (static_dir / "current.json").write_text(
         json.dumps(current_payload, ensure_ascii=False, indent=2),
         encoding="utf-8"
