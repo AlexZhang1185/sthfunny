@@ -1,0 +1,21 @@
+name: Deploy Staircase-GRU Report (stairgru)
+on:
+  push:
+    branches: [ stair-gru ]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy static_stair -> /stairgru/
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./static_stair
+          destination_dir: stairgru
+          keep_files: true
+          enable_jekyll: false

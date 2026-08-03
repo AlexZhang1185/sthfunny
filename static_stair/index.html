@@ -1,0 +1,98 @@
+<!doctype html><html lang=zh><head><meta charset=utf-8><title>可操作窗口预测 2026-08-02</title>
+<style>body{font-family:-apple-system,Segoe UI,Arial;margin:20px;color:#222}h1{font-size:19px}
+table{border-collapse:collapse;width:100%;font-size:12px}th,td{border:1px solid #ddd;padding:5px 7px;text-align:center}
+th{background:#2b6cb0;color:#fff} .sum{background:#eef4ff;padding:12px 16px;border-radius:8px;line-height:1.9;margin:10px 0}
+.note{color:#666;font-size:12px;margin-top:10px;line-height:1.7}</style></head><body>
+<h1>GRU 预测 · 最早决定性时刻 + 可操作窗口 — 2026-08-02</h1>
+<div class=sum>
+预测口径: 每个时刻的判断都<b>只用截至该时刻的全部口(因果前缀)</b>, 预测对象=阶梯锚线 L, <b>不使用未来数据</b>。<br>
+最早决定性时刻 <b>T*</b> = 从阶梯成形起, GRU 的 P(初判成立) 首次越过 0.65/0.30 的时刻。<br>
+可操作窗口 = [T*, 走势锁定时刻]; <b>走势锁定=累计角球触及锚线 L</b>(此后该方向已定, 无法再操作)。<br>
+<b>有效可操作(T* 早于锁定): 79 条, 命中 60, 正确率 75.9%</b> &nbsp;|&nbsp;
+无窗口(判断晚于锁定): 0 条 &nbsp;|&nbsp; 全程未达决定性: 0 条 &nbsp;|&nbsp; 阶梯总数 79
+</div>
+<table>
+<tr><th>ID</th><th>阶梯</th><th>区间</th><th>锚线</th><th>初判</th><th>最早决定性 T*</th><th>P</th><th>决策</th><th>建议</th><th>可操作窗口(锁定前)</th><th>终值</th><th>结果</th></tr>
+<tr style="background:#fde8e8"><td>2953324</td><td>下</td><td>9-&gt;8</td><td>8</td><td>高于</td><td><b>20′</b></td><td>0.24</td><td>反手</td><td><b>低于8</b></td><td>20′→76′ (<b>56分钟</b>)</td><td>10</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>2940767</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>20′</b></td><td>0.24</td><td>反手</td><td><b>低于8.5</b></td><td>20′→92′ (<b>72分钟</b>)</td><td>6</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>2927122</td><td>下</td><td>11.5-&gt;10.5</td><td>10.5</td><td>高于</td><td><b>20′</b></td><td>0.65</td><td>信原判</td><td><b>高于10.5</b></td><td>20′→92′ (<b>72分钟</b>)</td><td>9</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>2953325</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>20′</b></td><td>0.66</td><td>信原判</td><td><b>高于8.5</b></td><td>20′→75′ (<b>55分钟</b>)</td><td>11</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2914640</td><td>上</td><td>10-&gt;12</td><td>12</td><td>低于</td><td><b>20′</b></td><td>0.96</td><td>信原判</td><td><b>低于12</b></td><td>20′→92′ (<b>72分钟</b>)</td><td>9</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2913485</td><td>下</td><td>10.5-&gt;9.5</td><td>9.5</td><td>高于</td><td><b>20′</b></td><td>0.85</td><td>信原判</td><td><b>高于9.5</b></td><td>20′→66′ (<b>46分钟</b>)</td><td>12</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2913307</td><td>下</td><td>10-&gt;9</td><td>9</td><td>高于</td><td><b>20′</b></td><td>0.99</td><td>信原判</td><td><b>高于9</b></td><td>20′→74′ (<b>54分钟</b>)</td><td>11</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2911322</td><td>下</td><td>10-&gt;9</td><td>9</td><td>高于</td><td><b>20′</b></td><td>0.75</td><td>信原判</td><td><b>高于9</b></td><td>20′→69′ (<b>49分钟</b>)</td><td>12</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2989851</td><td>下</td><td>9-&gt;8</td><td>8</td><td>高于</td><td><b>20′</b></td><td>0.81</td><td>信原判</td><td><b>高于8</b></td><td>20′→74′ (<b>54分钟</b>)</td><td>12</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>3054125</td><td>下</td><td>8.5-&gt;7.5</td><td>7.5</td><td>高于</td><td><b>20′</b></td><td>0.78</td><td>信原判</td><td><b>高于7.5</b></td><td>20′→92′ (<b>72分钟</b>)</td><td>3</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>3043920</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>20′</b></td><td>0.69</td><td>信原判</td><td><b>高于8.5</b></td><td>20′→76′ (<b>56分钟</b>)</td><td>11</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3031151</td><td>上</td><td>9.5-&gt;11</td><td>11</td><td>低于</td><td><b>20′</b></td><td>0.89</td><td>信原判</td><td><b>低于11</b></td><td>20′→92′ (<b>72分钟</b>)</td><td>9</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>2931411</td><td>上</td><td>10.5-&gt;12.5</td><td>12.5</td><td>低于</td><td><b>20′</b></td><td>0.67</td><td>信原判</td><td><b>低于12.5</b></td><td>20′→89′ (<b>69分钟</b>)</td><td>13</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>2924612</td><td>上</td><td>11-&gt;12</td><td>12</td><td>低于</td><td><b>20′</b></td><td>0.89</td><td>信原判</td><td><b>低于12</b></td><td>20′→92′ (<b>72分钟</b>)</td><td>10</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2922052</td><td>上</td><td>9.5-&gt;10.5</td><td>10.5</td><td>低于</td><td><b>20′</b></td><td>0.78</td><td>信原判</td><td><b>低于10.5</b></td><td>20′→92′ (<b>72分钟</b>)</td><td>8</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3049839</td><td>上</td><td>8-&gt;10</td><td>10</td><td>低于</td><td><b>20′</b></td><td>0.78</td><td>信原判</td><td><b>低于10</b></td><td>20′→92′ (<b>72分钟</b>)</td><td>7</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3010605</td><td>下</td><td>9-&gt;8</td><td>8</td><td>高于</td><td><b>20′</b></td><td>0.83</td><td>信原判</td><td><b>高于8</b></td><td>20′→80′ (<b>60分钟</b>)</td><td>11</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2926262</td><td>下</td><td>11.5-&gt;10.5</td><td>10.5</td><td>高于</td><td><b>20′</b></td><td>0.69</td><td>信原判</td><td><b>高于10.5</b></td><td>20′→56′ (<b>36分钟</b>)</td><td>16</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3003396</td><td>上</td><td>9-&gt;11</td><td>11</td><td>低于</td><td><b>20′</b></td><td>0.85</td><td>信原判</td><td><b>低于11</b></td><td>20′→92′ (<b>72分钟</b>)</td><td>10</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3013005</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>20′</b></td><td>0.66</td><td>信原判</td><td><b>高于8.5</b></td><td>20′→92′ (<b>72分钟</b>)</td><td>9</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>3052338</td><td>下</td><td>10.5-&gt;9.5</td><td>9.5</td><td>高于</td><td><b>20′</b></td><td>0.92</td><td>信原判</td><td><b>高于9.5</b></td><td>20′→92′ (<b>72分钟</b>)</td><td>8</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>3041140</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>20′</b></td><td>0.75</td><td>信原判</td><td><b>高于8.5</b></td><td>20′→82′ (<b>62分钟</b>)</td><td>12</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2994869</td><td>下</td><td>10-&gt;9</td><td>9</td><td>高于</td><td><b>20′</b></td><td>0.79</td><td>信原判</td><td><b>高于9</b></td><td>20′→79′ (<b>59分钟</b>)</td><td>11</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2931413</td><td>下</td><td>12-&gt;11</td><td>11</td><td>高于</td><td><b>20′</b></td><td>0.71</td><td>信原判</td><td><b>高于11</b></td><td>20′→56′ (<b>36分钟</b>)</td><td>17</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2926940</td><td>上</td><td>9.5-&gt;11.5</td><td>11.5</td><td>低于</td><td><b>20′</b></td><td>0.90</td><td>信原判</td><td><b>低于11.5</b></td><td>20′→92′ (<b>72分钟</b>)</td><td>9</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3038397</td><td>下</td><td>9-&gt;8</td><td>8</td><td>高于</td><td><b>25′</b></td><td>0.79</td><td>信原判</td><td><b>高于8</b></td><td>25′→87′ (<b>62分钟</b>)</td><td>10</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>3010760</td><td>上</td><td>12-&gt;13.5</td><td>13.5</td><td>低于</td><td><b>25′</b></td><td>0.81</td><td>信原判</td><td><b>低于13.5</b></td><td>25′→92′ (<b>67分钟</b>)</td><td>14</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>3038398</td><td>下</td><td>8-&gt;6.5</td><td>6.5</td><td>高于</td><td><b>25′</b></td><td>0.97</td><td>信原判</td><td><b>高于6.5</b></td><td>25′→59′ (<b>34分钟</b>)</td><td>11</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3041139</td><td>下</td><td>9-&gt;8</td><td>8</td><td>高于</td><td><b>25′</b></td><td>0.87</td><td>信原判</td><td><b>高于8</b></td><td>25′→79′ (<b>54分钟</b>)</td><td>13</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3052292</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>25′</b></td><td>0.25</td><td>反手</td><td><b>低于8.5</b></td><td>25′→92′ (<b>67分钟</b>)</td><td>4</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>2920084</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>25′</b></td><td>0.24</td><td>反手</td><td><b>低于8.5</b></td><td>25′→92′ (<b>67分钟</b>)</td><td>9</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>3011367</td><td>上</td><td>10.5-&gt;12.5</td><td>12.5</td><td>低于</td><td><b>25′</b></td><td>0.21</td><td>反手</td><td><b>高于12.5</b></td><td>25′→48′ (<b>23分钟</b>)</td><td>17</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3049429</td><td>上</td><td>7.5-&gt;9</td><td>9</td><td>低于</td><td><b>25′</b></td><td>0.04</td><td>反手</td><td><b>高于9</b></td><td>25′→46′ (<b>21分钟</b>)</td><td>11</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>2931410</td><td>下</td><td>11-&gt;10</td><td>10</td><td>高于</td><td><b>25′</b></td><td>0.30</td><td>反手</td><td><b>低于10</b></td><td>25′→92′ (<b>67分钟</b>)</td><td>10</td><td>✘未中</td></tr>
+<tr style="background:#fde8e8"><td>2919849</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>25′</b></td><td>0.71</td><td>信原判</td><td><b>高于8.5</b></td><td>25′→92′ (<b>67分钟</b>)</td><td>6</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>2912219</td><td>下</td><td>11-&gt;10</td><td>10</td><td>高于</td><td><b>25′</b></td><td>0.14</td><td>反手</td><td><b>低于10</b></td><td>25′→92′ (<b>67分钟</b>)</td><td>7</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3050197</td><td>下</td><td>8-&gt;7</td><td>7</td><td>高于</td><td><b>25′</b></td><td>0.66</td><td>信原判</td><td><b>高于7</b></td><td>25′→57′ (<b>32分钟</b>)</td><td>9</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3005756</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>25′</b></td><td>0.68</td><td>信原判</td><td><b>高于8.5</b></td><td>25′→66′ (<b>41分钟</b>)</td><td>12</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3052325</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>25′</b></td><td>0.26</td><td>反手</td><td><b>低于8.5</b></td><td>25′→92′ (<b>67分钟</b>)</td><td>5</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3049428</td><td>下</td><td>8-&gt;7</td><td>7</td><td>高于</td><td><b>25′</b></td><td>0.76</td><td>信原判</td><td><b>高于7</b></td><td>25′→88′ (<b>63分钟</b>)</td><td>10</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>3052304</td><td>下</td><td>9-&gt;8</td><td>8</td><td>高于</td><td><b>25′</b></td><td>0.66</td><td>信原判</td><td><b>高于8</b></td><td>25′→92′ (<b>67分钟</b>)</td><td>8</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>2914379</td><td>下</td><td>10-&gt;9</td><td>9</td><td>高于</td><td><b>25′</b></td><td>0.78</td><td>信原判</td><td><b>高于9</b></td><td>25′→75′ (<b>50分钟</b>)</td><td>12</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>3031152</td><td>下</td><td>10-&gt;9</td><td>9</td><td>高于</td><td><b>30′</b></td><td>0.67</td><td>信原判</td><td><b>高于9</b></td><td>30′→92′ (<b>62分钟</b>)</td><td>5</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>2927124</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>30′</b></td><td>0.30</td><td>反手</td><td><b>低于8.5</b></td><td>30′→92′ (<b>62分钟</b>)</td><td>5</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2920088</td><td>下</td><td>9-&gt;8</td><td>8</td><td>高于</td><td><b>30′</b></td><td>0.17</td><td>反手</td><td><b>低于8</b></td><td>30′→92′ (<b>62分钟</b>)</td><td>7</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3049441</td><td>下</td><td>9-&gt;8</td><td>8</td><td>高于</td><td><b>30′</b></td><td>0.26</td><td>反手</td><td><b>低于8</b></td><td>30′→92′ (<b>62分钟</b>)</td><td>7</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>3048019</td><td>下</td><td>10.5-&gt;9.5</td><td>9.5</td><td>高于</td><td><b>30′</b></td><td>0.21</td><td>反手</td><td><b>低于9.5</b></td><td>30′→81′ (<b>51分钟</b>)</td><td>10</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>2997496</td><td>下</td><td>9-&gt;8</td><td>8</td><td>高于</td><td><b>30′</b></td><td>0.25</td><td>反手</td><td><b>低于8</b></td><td>30′→92′ (<b>62分钟</b>)</td><td>7</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2912852</td><td>上</td><td>11-&gt;13</td><td>13</td><td>低于</td><td><b>30′</b></td><td>0.04</td><td>反手</td><td><b>高于13</b></td><td>30′→77′ (<b>47分钟</b>)</td><td>17</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2927488</td><td>下</td><td>13.5-&gt;12.5</td><td>12.5</td><td>高于</td><td><b>30′</b></td><td>0.65</td><td>信原判</td><td><b>高于12.5</b></td><td>30′→86′ (<b>56分钟</b>)</td><td>14</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3004929</td><td>下</td><td>10.5-&gt;9.5</td><td>9.5</td><td>高于</td><td><b>30′</b></td><td>0.28</td><td>反手</td><td><b>低于9.5</b></td><td>30′→92′ (<b>62分钟</b>)</td><td>2</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>3009975</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>30′</b></td><td>0.69</td><td>信原判</td><td><b>高于8.5</b></td><td>30′→92′ (<b>62分钟</b>)</td><td>8</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>3019464</td><td>上</td><td>9-&gt;10.5</td><td>10.5</td><td>低于</td><td><b>35′</b></td><td>0.75</td><td>信原判</td><td><b>低于10.5</b></td><td>35′→92′ (<b>57分钟</b>)</td><td>8</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3019463</td><td>下</td><td>9-&gt;8</td><td>8</td><td>高于</td><td><b>35′</b></td><td>0.75</td><td>信原判</td><td><b>高于8</b></td><td>35′→60′ (<b>25分钟</b>)</td><td>12</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3043919</td><td>上</td><td>9.5-&gt;11</td><td>11</td><td>低于</td><td><b>35′</b></td><td>0.79</td><td>信原判</td><td><b>低于11</b></td><td>35′→92′ (<b>57分钟</b>)</td><td>8</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2939254</td><td>上</td><td>11-&gt;13</td><td>13</td><td>低于</td><td><b>35′</b></td><td>0.75</td><td>信原判</td><td><b>低于13</b></td><td>35′→92′ (<b>57分钟</b>)</td><td>11</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2919850</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>35′</b></td><td>0.26</td><td>反手</td><td><b>低于8.5</b></td><td>35′→92′ (<b>57分钟</b>)</td><td>7</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3003095</td><td>下</td><td>10-&gt;9</td><td>9</td><td>高于</td><td><b>35′</b></td><td>0.24</td><td>反手</td><td><b>低于9</b></td><td>35′→92′ (<b>57分钟</b>)</td><td>7</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2998210</td><td>上</td><td>9.5-&gt;11.5</td><td>11.5</td><td>低于</td><td><b>35′</b></td><td>0.74</td><td>信原判</td><td><b>低于11.5</b></td><td>35′→92′ (<b>57分钟</b>)</td><td>11</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>2931412</td><td>下</td><td>11.5-&gt;10.5</td><td>10.5</td><td>高于</td><td><b>35′</b></td><td>0.15</td><td>反手</td><td><b>低于10.5</b></td><td>35′→90′ (<b>55分钟</b>)</td><td>12</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>3022810</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>40′</b></td><td>0.29</td><td>反手</td><td><b>低于8.5</b></td><td>40′→92′ (<b>52分钟</b>)</td><td>5</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3052274</td><td>下</td><td>11-&gt;10</td><td>10</td><td>高于</td><td><b>40′</b></td><td>0.80</td><td>信原判</td><td><b>高于10</b></td><td>40′→84′ (<b>44分钟</b>)</td><td>14</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3002037</td><td>下</td><td>13.5-&gt;12.5</td><td>12.5</td><td>高于</td><td><b>40′</b></td><td>0.25</td><td>反手</td><td><b>低于12.5</b></td><td>40′→92′ (<b>52分钟</b>)</td><td>9</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2939255</td><td>下</td><td>9-&gt;8</td><td>8</td><td>高于</td><td><b>40′</b></td><td>0.22</td><td>反手</td><td><b>低于8</b></td><td>40′→92′ (<b>52分钟</b>)</td><td>7</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>2926758</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>40′</b></td><td>0.22</td><td>反手</td><td><b>低于8.5</b></td><td>40′→78′ (<b>38分钟</b>)</td><td>9</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>2914380</td><td>下</td><td>11-&gt;10</td><td>10</td><td>高于</td><td><b>40′</b></td><td>0.99</td><td>信原判</td><td><b>高于10</b></td><td>40′→53′ (<b>13分钟</b>)</td><td>14</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2913483</td><td>下</td><td>10-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>40′</b></td><td>0.29</td><td>反手</td><td><b>低于8.5</b></td><td>40′→92′ (<b>52分钟</b>)</td><td>6</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2921195</td><td>下</td><td>10-&gt;9</td><td>9</td><td>高于</td><td><b>40′</b></td><td>0.22</td><td>反手</td><td><b>低于9</b></td><td>40′→92′ (<b>52分钟</b>)</td><td>8</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>3001781</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>40′</b></td><td>1.00</td><td>信原判</td><td><b>高于8.5</b></td><td>40′→92′ (<b>52分钟</b>)</td><td>8</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>3010370</td><td>上</td><td>8.5-&gt;9.5</td><td>9.5</td><td>低于</td><td><b>40′</b></td><td>0.72</td><td>信原判</td><td><b>低于9.5</b></td><td>40′→92′ (<b>52分钟</b>)</td><td>5</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>3050198</td><td>下</td><td>8.5-&gt;7.5</td><td>7.5</td><td>高于</td><td><b>45′</b></td><td>0.29</td><td>反手</td><td><b>低于7.5</b></td><td>45′→64′ (<b>19分钟</b>)</td><td>11</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>2913678</td><td>下</td><td>10.5-&gt;9.5</td><td>9.5</td><td>高于</td><td><b>50′</b></td><td>0.27</td><td>反手</td><td><b>低于9.5</b></td><td>50′→92′ (<b>42分钟</b>)</td><td>9</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>2922056</td><td>下</td><td>11.5-&gt;10.5</td><td>10.5</td><td>高于</td><td><b>50′</b></td><td>0.19</td><td>反手</td><td><b>低于10.5</b></td><td>50′→88′ (<b>38分钟</b>)</td><td>11</td><td>✘未中</td></tr>
+<tr style="background:#e6f7e6"><td>3001782</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>50′</b></td><td>0.27</td><td>反手</td><td><b>低于8.5</b></td><td>50′→92′ (<b>42分钟</b>)</td><td>8</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3037094</td><td>下</td><td>8-&gt;7</td><td>7</td><td>高于</td><td><b>50′</b></td><td>0.19</td><td>反手</td><td><b>低于7</b></td><td>50′→92′ (<b>42分钟</b>)</td><td>5</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3000784</td><td>下</td><td>10-&gt;9</td><td>9</td><td>高于</td><td><b>55′</b></td><td>0.24</td><td>反手</td><td><b>低于9</b></td><td>55′→92′ (<b>37分钟</b>)</td><td>5</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>2998440</td><td>下</td><td>9.5-&gt;8.5</td><td>8.5</td><td>高于</td><td><b>55′</b></td><td>0.25</td><td>反手</td><td><b>低于8.5</b></td><td>55′→92′ (<b>37分钟</b>)</td><td>5</td><td>✔命中</td></tr>
+<tr style="background:#e6f7e6"><td>3049427</td><td>下</td><td>9-&gt;8</td><td>8</td><td>高于</td><td><b>60′</b></td><td>0.27</td><td>反手</td><td><b>低于8</b></td><td>60′→92′ (<b>32分钟</b>)</td><td>6</td><td>✔命中</td></tr>
+<tr style="background:#fde8e8"><td>2962536</td><td>下</td><td>8.5-&gt;7.5</td><td>7.5</td><td>高于</td><td><b>65′</b></td><td>0.23</td><td>反手</td><td><b>低于7.5</b></td><td>65′→92′ (<b>27分钟</b>)</td><td>8</td><td>✘未中</td></tr>
+</table>
+<div class=note>灰行=无有效窗口(判断出得比"角球触及锚线"还晚, 或全程未达决定性)→ 预测无操作意义。<br>
+窗口"X′→Y′(N分钟)": X=最早可下手, Y=走势锁定(角球达锚线), N=可操作时长。样本外(1–4月训练)。仅策略验证, 非投注建议。</div>
+</body></html>

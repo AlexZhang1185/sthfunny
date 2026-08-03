@@ -118,9 +118,11 @@ def _build_settlement_dataset(matches: list[dict[str, Any]]) -> pd.DataFrame:
         rate_2m = moving_sum(corner_inc, 2) / 2.0
         second_half_rate = np.where(second_half == 1, second_half_corners / np.maximum(1, minute - 45), 0.0)
 
+        # 因果累计分位: 当前线在'截至此刻'出现过的线中的百分位(不看未来), 替代原对整场排名的写法
+        line_rank_causal = np.array([float((line[: i + 1] <= line[i]).mean()) for i in range(len(line))], dtype=np.float32)
         feat_df = feat_df.assign(
             target_settlement=np.array([_label_settlement(final_total, v) for v in line], dtype=np.int32),
-            line_rank_in_match=feat_df["line"].rank(method="average", pct=True).astype(float),
+            line_rank_in_match=line_rank_causal,  # 因果分位(不看未来), 消除泄漏
             minute_progress=feat_df["minute"].astype(float) / 100.0,
             corners_progress=np.minimum(feat_df["corners_so_far"].astype(float) / 20.0, 1.5),
             line_minus_corners=line_minus_corners,
