@@ -1,184 +1,163 @@
 {
-  "generated_at": "2026-08-03T10:16:03Z",
+  "generated_at": "2026-08-03T13:47:51Z",
   "strategy": "first_3x_08_any",
   "source": "oldIndexall/bfdata_ut.js",
   "date": "20260803",
   "note": "For live matches, final relation uses current page corners as proxy, not full-time settled result.",
-  "feed_live_match_count": 11,
+  "feed_live_match_count": 10,
   "crawl_summary": {
     "mode": "manual_match_ids_sequential",
-    "submitted": 11,
-    "processed": 11,
-    "written": 4,
-    "reject_reasons": {
-      "too_few_rows": 1
-    },
+    "submitted": 10,
+    "processed": 10,
+    "written": 5,
+    "reject_reasons": {},
     "stopped_early": false,
-    "time_budget_s": 840.0,
+    "time_budget_s": 900.0,
     "date": "20260803"
   },
-  "match_count": 4,
+  "match_count": 5,
   "rows": [
     {
-      "match_id": "2997199",
-      "home_team_name": "胡志明市女足",
-      "away_team_name": "河内女足",
-      "latest_minute": 52,
-      "latest_line": 4.0,
-      "latest_corners_so_far": 1,
-      "latest_pred": "over",
-      "latest_p_under": 0.0035,
-      "latest_p_push": 0.0995,
-      "latest_p_over": 0.897,
+      "match_id": "3054157",
+      "home_team_name": "漫游者后备队",
+      "away_team_name": "波士顿河后备队",
+      "latest_minute": 55,
+      "latest_line": 9.0,
+      "latest_corners_so_far": 5,
+      "latest_pred": "under",
+      "latest_p_under": 0.4038,
+      "latest_p_push": 0.2069,
+      "latest_p_over": 0.3893,
       "triggered": true,
-      "trigger_minute": 1,
-      "line": 6.7,
-      "corners_so_far": 0,
+      "trigger_minute": 3,
+      "line": 10.0,
+      "corners_so_far": 1,
       "pred_side": "under",
-      "pred_prob": 0.9208,
-      "first_entry_minute": 1,
-      "first_entry_line": 6.7,
+      "pred_prob": 0.891,
+      "first_entry_minute": 3,
+      "first_entry_line": 10.0,
       "first_entry_side": "under",
-      "first_entry_prob": 0.9208,
-      "first_entry_text": "1' under 6.0-7.5 (avg conf: 0.9208, 13 triggers)",
-      "line_changes": 10,
-      "opp_conf_max_after": 0.897,
+      "first_entry_prob": 0.891,
+      "first_entry_text": "3' under 9.5-10.5 (avg conf: 0.8910, 9 triggers)",
+      "line_changes": 16,
+      "opp_conf_max_after": 0.9653,
       "risk_flag": 3,
       "risk_reasons": [
         "strong_opposite_after_trigger",
-        "wide_trigger_interval",
+        "high_line_volatility",
         "multiple_opposite_triggers"
       ],
       "risk_alert": true,
-      "risk_alert_text": "reasons=strong_opposite_after_trigger,wide_trigger_interval,multiple_opposite_triggers | hedge=32' over 4.5 (0.8006)",
+      "risk_alert_text": "reasons=strong_opposite_after_trigger,high_line_volatility,multiple_opposite_triggers | hedge=47' over 7.5 (0.9302)",
       "risk_events": [
         {
           "type": "opposite_trigger",
-          "minute": 32,
-          "line": 4.5,
+          "minute": 47,
+          "line": 7.5,
           "side": "over",
-          "prob": 0.8006
+          "prob": 0.9302
         }
       ],
       "hedge_recommended": true,
-      "hedge_minute": 32,
-      "hedge_line": 4.5,
+      "hedge_minute": 47,
+      "hedge_line": 7.5,
       "hedge_side": "over",
-      "hedge_prob": 0.8006,
-      "hedge_text": "32' over 4.5 (0.8006)",
+      "hedge_prob": 0.9302,
+      "hedge_text": "47' over 7.5 (0.9302)",
       "all_triggers": [
         {
-          "start_index": 0,
-          "start_minute": 1,
-          "end_minute": 3,
-          "side": "under",
-          "line": 7.5,
-          "corners_so_far": 0,
-          "pred_prob": 0.9817,
-          "conf_triplet": [
-            0.9817,
-            0.9307,
-            0.9409
-          ],
-          "line_triplet": [
-            7.5,
-            7.0,
-            7.0
-          ]
-        },
-        {
           "start_index": 1,
-          "start_minute": 2,
-          "end_minute": 4,
+          "start_minute": 3,
+          "end_minute": 5,
           "side": "under",
-          "line": 7.0,
-          "corners_so_far": 0,
-          "pred_prob": 0.9307,
+          "line": 10.5,
+          "corners_so_far": 1,
+          "pred_prob": 0.9599,
           "conf_triplet": [
-            0.9307,
-            0.9409,
-            0.9427
+            0.9599,
+            0.9648,
+            0.9643
           ],
           "line_triplet": [
-            7.0,
-            7.0,
-            7.0
+            10.5,
+            10.5,
+            10.5
           ]
         },
         {
           "start_index": 2,
-          "start_minute": 3,
-          "end_minute": 5,
+          "start_minute": 4,
+          "end_minute": 6,
           "side": "under",
-          "line": 7.0,
-          "corners_so_far": 0,
-          "pred_prob": 0.9409,
+          "line": 10.5,
+          "corners_so_far": 1,
+          "pred_prob": 0.9648,
           "conf_triplet": [
-            0.9409,
-            0.9427,
-            0.9409
+            0.9648,
+            0.9643,
+            0.9603
           ],
           "line_triplet": [
-            7.0,
-            7.0,
-            7.0
+            10.5,
+            10.5,
+            10.5
           ]
         },
         {
           "start_index": 3,
-          "start_minute": 4,
-          "end_minute": 6,
+          "start_minute": 5,
+          "end_minute": 7,
           "side": "under",
-          "line": 7.0,
-          "corners_so_far": 0,
-          "pred_prob": 0.9427,
+          "line": 10.5,
+          "corners_so_far": 1,
+          "pred_prob": 0.9643,
           "conf_triplet": [
-            0.9427,
-            0.9409,
-            0.9383
+            0.9643,
+            0.9603,
+            0.8558
           ],
           "line_triplet": [
-            7.0,
-            7.0,
-            7.0
+            10.5,
+            10.5,
+            10.0
           ]
         },
         {
           "start_index": 4,
-          "start_minute": 5,
+          "start_minute": 6,
           "end_minute": 8,
           "side": "under",
-          "line": 7.0,
-          "corners_so_far": 0,
-          "pred_prob": 0.9409,
+          "line": 10.5,
+          "corners_so_far": 1,
+          "pred_prob": 0.9603,
           "conf_triplet": [
-            0.9409,
-            0.9383,
-            0.9178
+            0.9603,
+            0.8558,
+            0.8502
           ],
           "line_triplet": [
-            7.0,
-            7.0,
-            6.5
+            10.5,
+            10.0,
+            10.0
           ]
         },
         {
           "start_index": 5,
-          "start_minute": 6,
+          "start_minute": 7,
           "end_minute": 9,
           "side": "under",
-          "line": 7.0,
-          "corners_so_far": 0,
-          "pred_prob": 0.9383,
+          "line": 10.0,
+          "corners_so_far": 1,
+          "pred_prob": 0.8558,
           "conf_triplet": [
-            0.9383,
-            0.9178,
-            0.9157
+            0.8558,
+            0.8502,
+            0.8489
           ],
           "line_triplet": [
-            7.0,
-            6.5,
-            6.5
+            10.0,
+            10.0,
+            10.0
           ]
         },
         {
@@ -186,860 +165,51 @@
           "start_minute": 8,
           "end_minute": 10,
           "side": "under",
-          "line": 6.5,
-          "corners_so_far": 0,
-          "pred_prob": 0.9178,
+          "line": 10.0,
+          "corners_so_far": 1,
+          "pred_prob": 0.8502,
           "conf_triplet": [
-            0.9178,
-            0.9157,
-            0.9122
+            0.8502,
+            0.8489,
+            0.8437
           ],
           "line_triplet": [
-            6.5,
-            6.5,
-            6.5
+            10.0,
+            10.0,
+            10.0
           ]
         },
         {
-          "start_index": 7,
-          "start_minute": 9,
-          "end_minute": 11,
+          "start_index": 18,
+          "start_minute": 20,
+          "end_minute": 22,
           "side": "under",
-          "line": 6.5,
-          "corners_so_far": 0,
-          "pred_prob": 0.9157,
+          "line": 10.0,
+          "corners_so_far": 2,
+          "pred_prob": 0.8291,
           "conf_triplet": [
-            0.9157,
-            0.9122,
-            0.919
+            0.8291,
+            0.8261,
+            0.8082
           ],
           "line_triplet": [
-            6.5,
-            6.5,
-            6.5
+            10.0,
+            9.5,
+            9.5
           ]
         },
         {
-          "start_index": 8,
-          "start_minute": 10,
-          "end_minute": 12,
-          "side": "under",
-          "line": 6.5,
-          "corners_so_far": 0,
-          "pred_prob": 0.9122,
-          "conf_triplet": [
-            0.9122,
-            0.919,
-            0.9094
-          ],
-          "line_triplet": [
-            6.5,
-            6.5,
-            6.5
-          ]
-        },
-        {
-          "start_index": 9,
-          "start_minute": 11,
-          "end_minute": 13,
-          "side": "under",
-          "line": 6.5,
-          "corners_so_far": 0,
-          "pred_prob": 0.919,
-          "conf_triplet": [
-            0.919,
-            0.9094,
-            0.9181
-          ],
-          "line_triplet": [
-            6.5,
-            6.5,
-            6.5
-          ]
-        },
-        {
-          "start_index": 10,
-          "start_minute": 12,
-          "end_minute": 14,
-          "side": "under",
-          "line": 6.5,
-          "corners_so_far": 0,
-          "pred_prob": 0.9094,
-          "conf_triplet": [
-            0.9094,
-            0.9181,
-            0.8025
-          ],
-          "line_triplet": [
-            6.5,
-            6.5,
-            6.0
-          ]
-        },
-        {
-          "start_index": 11,
-          "start_minute": 13,
-          "end_minute": 15,
-          "side": "under",
-          "line": 6.5,
-          "corners_so_far": 0,
-          "pred_prob": 0.9181,
-          "conf_triplet": [
-            0.9181,
-            0.8025,
-            0.8037
-          ],
-          "line_triplet": [
-            6.5,
-            6.0,
-            6.0
-          ]
-        },
-        {
-          "start_index": 12,
-          "start_minute": 14,
-          "end_minute": 16,
-          "side": "under",
-          "line": 6.0,
-          "corners_so_far": 0,
-          "pred_prob": 0.8025,
-          "conf_triplet": [
-            0.8025,
-            0.8037,
-            0.8014
-          ],
-          "line_triplet": [
-            6.0,
-            6.0,
-            6.0
-          ]
-        },
-        {
-          "start_index": 28,
-          "start_minute": 32,
-          "end_minute": 34,
-          "side": "over",
-          "line": 4.5,
-          "corners_so_far": 0,
-          "pred_prob": 0.8006,
-          "conf_triplet": [
-            0.8006,
-            0.8161,
-            0.8344
-          ],
-          "line_triplet": [
-            4.5,
-            4.5,
-            4.5
-          ]
-        },
-        {
-          "start_index": 29,
-          "start_minute": 33,
-          "end_minute": 35,
-          "side": "over",
-          "line": 4.5,
-          "corners_so_far": 0,
-          "pred_prob": 0.8161,
-          "conf_triplet": [
-            0.8161,
-            0.8344,
-            0.8608
-          ],
-          "line_triplet": [
-            4.5,
-            4.5,
-            4.5
-          ]
-        },
-        {
-          "start_index": 30,
-          "start_minute": 34,
-          "end_minute": 36,
-          "side": "over",
-          "line": 4.5,
-          "corners_so_far": 0,
-          "pred_prob": 0.8344,
-          "conf_triplet": [
-            0.8344,
-            0.8608,
-            0.866
-          ],
-          "line_triplet": [
-            4.5,
-            4.5,
-            4.5
-          ]
-        },
-        {
-          "start_index": 41,
-          "start_minute": 46,
-          "end_minute": 48,
-          "side": "over",
-          "line": 4.5,
-          "corners_so_far": 1,
-          "pred_prob": 0.8393,
-          "conf_triplet": [
-            0.8393,
-            0.863,
-            0.8726
-          ],
-          "line_triplet": [
-            4.5,
-            4.5,
-            4.5
-          ]
-        },
-        {
-          "start_index": 42,
-          "start_minute": 47,
-          "end_minute": 49,
-          "side": "over",
-          "line": 4.5,
-          "corners_so_far": 1,
-          "pred_prob": 0.863,
-          "conf_triplet": [
-            0.863,
-            0.8726,
-            0.876
-          ],
-          "line_triplet": [
-            4.5,
-            4.5,
-            4.5
-          ]
-        },
-        {
-          "start_index": 43,
-          "start_minute": 48,
-          "end_minute": 50,
-          "side": "over",
-          "line": 4.5,
-          "corners_so_far": 1,
-          "pred_prob": 0.8726,
-          "conf_triplet": [
-            0.8726,
-            0.876,
-            0.8732
-          ],
-          "line_triplet": [
-            4.5,
-            4.5,
-            4.0
-          ]
-        },
-        {
-          "start_index": 44,
-          "start_minute": 49,
-          "end_minute": 51,
-          "side": "over",
-          "line": 4.5,
-          "corners_so_far": 1,
-          "pred_prob": 0.876,
-          "conf_triplet": [
-            0.876,
-            0.8732,
-            0.8812
-          ],
-          "line_triplet": [
-            4.5,
-            4.0,
-            4.0
-          ]
-        },
-        {
-          "start_index": 45,
-          "start_minute": 50,
-          "end_minute": 52,
-          "side": "over",
-          "line": 4.0,
-          "corners_so_far": 1,
-          "pred_prob": 0.8732,
-          "conf_triplet": [
-            0.8732,
-            0.8812,
-            0.897
-          ],
-          "line_triplet": [
-            4.0,
-            4.0,
-            4.0
-          ]
-        }
-      ],
-      "trigger_summary": {
-        "dominant_side": "under",
-        "trigger_count": 13,
-        "trigger_interval": [
-          6.0,
-          7.5
-        ],
-        "interval_width": 1.5,
-        "weighted_recommended_line": 6.65,
-        "average_confidence": 0.9208,
-        "stability_rating": "low",
-        "has_opposite_triggers": true,
-        "opposite_trigger_count": 8,
-        "all_triggers": [
-          {
-            "start_index": 0,
-            "start_minute": 1,
-            "end_minute": 3,
-            "side": "under",
-            "line": 7.5,
-            "corners_so_far": 0,
-            "pred_prob": 0.9817,
-            "conf_triplet": [
-              0.9817,
-              0.9307,
-              0.9409
-            ],
-            "line_triplet": [
-              7.5,
-              7.0,
-              7.0
-            ]
-          },
-          {
-            "start_index": 1,
-            "start_minute": 2,
-            "end_minute": 4,
-            "side": "under",
-            "line": 7.0,
-            "corners_so_far": 0,
-            "pred_prob": 0.9307,
-            "conf_triplet": [
-              0.9307,
-              0.9409,
-              0.9427
-            ],
-            "line_triplet": [
-              7.0,
-              7.0,
-              7.0
-            ]
-          },
-          {
-            "start_index": 2,
-            "start_minute": 3,
-            "end_minute": 5,
-            "side": "under",
-            "line": 7.0,
-            "corners_so_far": 0,
-            "pred_prob": 0.9409,
-            "conf_triplet": [
-              0.9409,
-              0.9427,
-              0.9409
-            ],
-            "line_triplet": [
-              7.0,
-              7.0,
-              7.0
-            ]
-          },
-          {
-            "start_index": 3,
-            "start_minute": 4,
-            "end_minute": 6,
-            "side": "under",
-            "line": 7.0,
-            "corners_so_far": 0,
-            "pred_prob": 0.9427,
-            "conf_triplet": [
-              0.9427,
-              0.9409,
-              0.9383
-            ],
-            "line_triplet": [
-              7.0,
-              7.0,
-              7.0
-            ]
-          },
-          {
-            "start_index": 4,
-            "start_minute": 5,
-            "end_minute": 8,
-            "side": "under",
-            "line": 7.0,
-            "corners_so_far": 0,
-            "pred_prob": 0.9409,
-            "conf_triplet": [
-              0.9409,
-              0.9383,
-              0.9178
-            ],
-            "line_triplet": [
-              7.0,
-              7.0,
-              6.5
-            ]
-          },
-          {
-            "start_index": 5,
-            "start_minute": 6,
-            "end_minute": 9,
-            "side": "under",
-            "line": 7.0,
-            "corners_so_far": 0,
-            "pred_prob": 0.9383,
-            "conf_triplet": [
-              0.9383,
-              0.9178,
-              0.9157
-            ],
-            "line_triplet": [
-              7.0,
-              6.5,
-              6.5
-            ]
-          },
-          {
-            "start_index": 6,
-            "start_minute": 8,
-            "end_minute": 10,
-            "side": "under",
-            "line": 6.5,
-            "corners_so_far": 0,
-            "pred_prob": 0.9178,
-            "conf_triplet": [
-              0.9178,
-              0.9157,
-              0.9122
-            ],
-            "line_triplet": [
-              6.5,
-              6.5,
-              6.5
-            ]
-          },
-          {
-            "start_index": 7,
-            "start_minute": 9,
-            "end_minute": 11,
-            "side": "under",
-            "line": 6.5,
-            "corners_so_far": 0,
-            "pred_prob": 0.9157,
-            "conf_triplet": [
-              0.9157,
-              0.9122,
-              0.919
-            ],
-            "line_triplet": [
-              6.5,
-              6.5,
-              6.5
-            ]
-          },
-          {
-            "start_index": 8,
-            "start_minute": 10,
-            "end_minute": 12,
-            "side": "under",
-            "line": 6.5,
-            "corners_so_far": 0,
-            "pred_prob": 0.9122,
-            "conf_triplet": [
-              0.9122,
-              0.919,
-              0.9094
-            ],
-            "line_triplet": [
-              6.5,
-              6.5,
-              6.5
-            ]
-          },
-          {
-            "start_index": 9,
-            "start_minute": 11,
-            "end_minute": 13,
-            "side": "under",
-            "line": 6.5,
-            "corners_so_far": 0,
-            "pred_prob": 0.919,
-            "conf_triplet": [
-              0.919,
-              0.9094,
-              0.9181
-            ],
-            "line_triplet": [
-              6.5,
-              6.5,
-              6.5
-            ]
-          },
-          {
-            "start_index": 10,
-            "start_minute": 12,
-            "end_minute": 14,
-            "side": "under",
-            "line": 6.5,
-            "corners_so_far": 0,
-            "pred_prob": 0.9094,
-            "conf_triplet": [
-              0.9094,
-              0.9181,
-              0.8025
-            ],
-            "line_triplet": [
-              6.5,
-              6.5,
-              6.0
-            ]
-          },
-          {
-            "start_index": 11,
-            "start_minute": 13,
-            "end_minute": 15,
-            "side": "under",
-            "line": 6.5,
-            "corners_so_far": 0,
-            "pred_prob": 0.9181,
-            "conf_triplet": [
-              0.9181,
-              0.8025,
-              0.8037
-            ],
-            "line_triplet": [
-              6.5,
-              6.0,
-              6.0
-            ]
-          },
-          {
-            "start_index": 12,
-            "start_minute": 14,
-            "end_minute": 16,
-            "side": "under",
-            "line": 6.0,
-            "corners_so_far": 0,
-            "pred_prob": 0.8025,
-            "conf_triplet": [
-              0.8025,
-              0.8037,
-              0.8014
-            ],
-            "line_triplet": [
-              6.0,
-              6.0,
-              6.0
-            ]
-          },
-          {
-            "start_index": 28,
-            "start_minute": 32,
-            "end_minute": 34,
-            "side": "over",
-            "line": 4.5,
-            "corners_so_far": 0,
-            "pred_prob": 0.8006,
-            "conf_triplet": [
-              0.8006,
-              0.8161,
-              0.8344
-            ],
-            "line_triplet": [
-              4.5,
-              4.5,
-              4.5
-            ]
-          },
-          {
-            "start_index": 29,
-            "start_minute": 33,
-            "end_minute": 35,
-            "side": "over",
-            "line": 4.5,
-            "corners_so_far": 0,
-            "pred_prob": 0.8161,
-            "conf_triplet": [
-              0.8161,
-              0.8344,
-              0.8608
-            ],
-            "line_triplet": [
-              4.5,
-              4.5,
-              4.5
-            ]
-          },
-          {
-            "start_index": 30,
-            "start_minute": 34,
-            "end_minute": 36,
-            "side": "over",
-            "line": 4.5,
-            "corners_so_far": 0,
-            "pred_prob": 0.8344,
-            "conf_triplet": [
-              0.8344,
-              0.8608,
-              0.866
-            ],
-            "line_triplet": [
-              4.5,
-              4.5,
-              4.5
-            ]
-          },
-          {
-            "start_index": 41,
-            "start_minute": 46,
-            "end_minute": 48,
-            "side": "over",
-            "line": 4.5,
-            "corners_so_far": 1,
-            "pred_prob": 0.8393,
-            "conf_triplet": [
-              0.8393,
-              0.863,
-              0.8726
-            ],
-            "line_triplet": [
-              4.5,
-              4.5,
-              4.5
-            ]
-          },
-          {
-            "start_index": 42,
-            "start_minute": 47,
-            "end_minute": 49,
-            "side": "over",
-            "line": 4.5,
-            "corners_so_far": 1,
-            "pred_prob": 0.863,
-            "conf_triplet": [
-              0.863,
-              0.8726,
-              0.876
-            ],
-            "line_triplet": [
-              4.5,
-              4.5,
-              4.5
-            ]
-          },
-          {
-            "start_index": 43,
-            "start_minute": 48,
-            "end_minute": 50,
-            "side": "over",
-            "line": 4.5,
-            "corners_so_far": 1,
-            "pred_prob": 0.8726,
-            "conf_triplet": [
-              0.8726,
-              0.876,
-              0.8732
-            ],
-            "line_triplet": [
-              4.5,
-              4.5,
-              4.0
-            ]
-          },
-          {
-            "start_index": 44,
-            "start_minute": 49,
-            "end_minute": 51,
-            "side": "over",
-            "line": 4.5,
-            "corners_so_far": 1,
-            "pred_prob": 0.876,
-            "conf_triplet": [
-              0.876,
-              0.8732,
-              0.8812
-            ],
-            "line_triplet": [
-              4.5,
-              4.0,
-              4.0
-            ]
-          },
-          {
-            "start_index": 45,
-            "start_minute": 50,
-            "end_minute": 52,
-            "side": "over",
-            "line": 4.0,
-            "corners_so_far": 1,
-            "pred_prob": 0.8732,
-            "conf_triplet": [
-              0.8732,
-              0.8812,
-              0.897
-            ],
-            "line_triplet": [
-              4.0,
-              4.0,
-              4.0
-            ]
-          }
-        ]
-      },
-      "final_total_proxy_from_page": 1,
-      "final_relation_proxy": "under",
-      "hit_proxy": true,
-      "sticky_triggered": true,
-      "sticky_minute": 1,
-      "sticky_side": "under",
-      "sticky_prob": 0.9817,
-      "sticky_line": 7.5,
-      "sticky_corners_so_far": 0,
-      "sticky_relation": "under",
-      "sticky_hit": true,
-      "minute_rows_last10": [
-        {
-          "minute": 43,
-          "line": 5.0,
-          "corners_so_far": 1,
-          "pred": "under",
-          "p_under": 0.3898,
-          "p_push": 0.284,
-          "p_over": 0.3263
-        },
-        {
-          "minute": 44,
-          "line": 5.0,
-          "corners_so_far": 1,
-          "pred": "under",
-          "p_under": 0.3739,
-          "p_push": 0.277,
-          "p_over": 0.3491
-        },
-        {
-          "minute": 45,
-          "line": 5.0,
-          "corners_so_far": 1,
-          "pred": "under",
-          "p_under": 0.3922,
-          "p_push": 0.2731,
-          "p_over": 0.3347
-        },
-        {
-          "minute": 46,
-          "line": 4.5,
-          "corners_so_far": 1,
-          "pred": "over",
-          "p_under": 0.1607,
-          "p_push": 0.0,
-          "p_over": 0.8393
-        },
-        {
-          "minute": 47,
-          "line": 4.5,
-          "corners_so_far": 1,
-          "pred": "over",
-          "p_under": 0.137,
-          "p_push": 0.0,
-          "p_over": 0.863
-        },
-        {
-          "minute": 48,
-          "line": 4.5,
-          "corners_so_far": 1,
-          "pred": "over",
-          "p_under": 0.1274,
-          "p_push": 0.0,
-          "p_over": 0.8726
-        },
-        {
-          "minute": 49,
-          "line": 4.5,
-          "corners_so_far": 1,
-          "pred": "over",
-          "p_under": 0.124,
-          "p_push": 0.0,
-          "p_over": 0.876
-        },
-        {
-          "minute": 50,
-          "line": 4.0,
-          "corners_so_far": 1,
-          "pred": "over",
-          "p_under": 0.0084,
-          "p_push": 0.1184,
-          "p_over": 0.8732
-        },
-        {
-          "minute": 51,
-          "line": 4.0,
-          "corners_so_far": 1,
-          "pred": "over",
-          "p_under": 0.0039,
-          "p_push": 0.1149,
-          "p_over": 0.8812
-        },
-        {
-          "minute": 52,
-          "line": 4.0,
-          "corners_so_far": 1,
-          "pred": "over",
-          "p_under": 0.0035,
-          "p_push": 0.0995,
-          "p_over": 0.897
-        }
-      ],
-      "league_name": "越女联",
-      "kickoff_time": "17:00",
-      "current_score": "1-0",
-      "current_corner_score": "0-0",
-      "final_total_corners": 1,
-      "is_finished": true
-    },
-    {
-      "match_id": "3054163",
-      "home_team_name": "BSS体育俱乐部",
-      "away_team_name": "东孟加拉II",
-      "latest_minute": 39,
-      "latest_line": 8.0,
-      "latest_corners_so_far": 2,
-      "latest_pred": "over",
-      "latest_p_under": 0.2737,
-      "latest_p_push": 0.2187,
-      "latest_p_over": 0.5076,
-      "triggered": true,
-      "trigger_minute": 32,
-      "line": 6.5,
-      "corners_so_far": 1,
-      "pred_side": "over",
-      "pred_prob": 0.9488,
-      "first_entry_minute": 32,
-      "first_entry_line": 6.5,
-      "first_entry_side": "over",
-      "first_entry_prob": 0.9488,
-      "first_entry_text": "32' over 6.5-6.5 (avg conf: 0.9488, 2 triggers)",
-      "line_changes": 10,
-      "opp_conf_max_after": 0.2737,
-      "risk_flag": 0,
-      "risk_reasons": [],
-      "risk_alert": false,
-      "risk_alert_text": "none",
-      "risk_events": [],
-      "hedge_recommended": false,
-      "hedge_minute": null,
-      "hedge_line": null,
-      "hedge_side": null,
-      "hedge_prob": null,
-      "hedge_text": null,
-      "all_triggers": [
-        {
-          "start_index": 7,
-          "start_minute": 14,
-          "end_minute": 16,
+          "start_index": 19,
+          "start_minute": 21,
+          "end_minute": 23,
           "side": "under",
           "line": 9.5,
-          "corners_so_far": 1,
-          "pred_prob": 0.9151,
+          "corners_so_far": 2,
+          "pred_prob": 0.8261,
           "conf_triplet": [
-            0.9151,
-            0.9184,
-            0.9237
+            0.8261,
+            0.8082,
+            0.8216
           ],
           "line_triplet": [
             9.5,
@@ -1049,69 +219,259 @@
         },
         {
           "start_index": 20,
-          "start_minute": 32,
-          "end_minute": 34,
-          "side": "over",
-          "line": 6.5,
-          "corners_so_far": 1,
-          "pred_prob": 0.9379,
+          "start_minute": 22,
+          "end_minute": 25,
+          "side": "under",
+          "line": 9.5,
+          "corners_so_far": 2,
+          "pred_prob": 0.8082,
           "conf_triplet": [
-            0.9379,
-            0.9598,
-            0.9267
+            0.8082,
+            0.8216,
+            0.8316
           ],
           "line_triplet": [
-            6.5,
-            6.5,
+            9.5,
+            9.5,
+            9.5
+          ]
+        },
+        {
+          "start_index": 41,
+          "start_minute": 47,
+          "end_minute": 49,
+          "side": "over",
+          "line": 7.5,
+          "corners_so_far": 3,
+          "pred_prob": 0.9302,
+          "conf_triplet": [
+            0.9302,
+            0.9481,
+            0.951
+          ],
+          "line_triplet": [
+            7.5,
+            7.5,
             7.5
           ]
         },
         {
-          "start_index": 21,
-          "start_minute": 33,
-          "end_minute": 35,
+          "start_index": 42,
+          "start_minute": 48,
+          "end_minute": 50,
           "side": "over",
-          "line": 6.5,
-          "corners_so_far": 1,
-          "pred_prob": 0.9598,
+          "line": 7.5,
+          "corners_so_far": 3,
+          "pred_prob": 0.9481,
           "conf_triplet": [
-            0.9598,
-            0.9267,
-            0.9161
+            0.9481,
+            0.951,
+            0.9653
           ],
           "line_triplet": [
-            6.5,
+            7.5,
             7.5,
             7.5
+          ]
+        },
+        {
+          "start_index": 43,
+          "start_minute": 49,
+          "end_minute": 51,
+          "side": "over",
+          "line": 7.5,
+          "corners_so_far": 3,
+          "pred_prob": 0.951,
+          "conf_triplet": [
+            0.951,
+            0.9653,
+            0.9129
+          ],
+          "line_triplet": [
+            7.5,
+            7.5,
+            8.5
+          ]
+        },
+        {
+          "start_index": 44,
+          "start_minute": 50,
+          "end_minute": 52,
+          "side": "over",
+          "line": 7.5,
+          "corners_so_far": 3,
+          "pred_prob": 0.9653,
+          "conf_triplet": [
+            0.9653,
+            0.9129,
+            0.9089
+          ],
+          "line_triplet": [
+            7.5,
+            8.5,
+            8.5
           ]
         }
       ],
       "trigger_summary": {
-        "dominant_side": "over",
-        "trigger_count": 2,
+        "dominant_side": "under",
+        "trigger_count": 9,
         "trigger_interval": [
-          6.5,
-          6.5
+          9.5,
+          10.5
         ],
-        "interval_width": 0.0,
-        "weighted_recommended_line": 6.5,
-        "average_confidence": 0.9488,
-        "stability_rating": "high",
+        "interval_width": 1.0,
+        "weighted_recommended_line": 10.04,
+        "average_confidence": 0.891,
+        "stability_rating": "medium",
         "has_opposite_triggers": true,
-        "opposite_trigger_count": 1,
+        "opposite_trigger_count": 4,
         "all_triggers": [
           {
-            "start_index": 7,
-            "start_minute": 14,
-            "end_minute": 16,
+            "start_index": 1,
+            "start_minute": 3,
+            "end_minute": 5,
+            "side": "under",
+            "line": 10.5,
+            "corners_so_far": 1,
+            "pred_prob": 0.9599,
+            "conf_triplet": [
+              0.9599,
+              0.9648,
+              0.9643
+            ],
+            "line_triplet": [
+              10.5,
+              10.5,
+              10.5
+            ]
+          },
+          {
+            "start_index": 2,
+            "start_minute": 4,
+            "end_minute": 6,
+            "side": "under",
+            "line": 10.5,
+            "corners_so_far": 1,
+            "pred_prob": 0.9648,
+            "conf_triplet": [
+              0.9648,
+              0.9643,
+              0.9603
+            ],
+            "line_triplet": [
+              10.5,
+              10.5,
+              10.5
+            ]
+          },
+          {
+            "start_index": 3,
+            "start_minute": 5,
+            "end_minute": 7,
+            "side": "under",
+            "line": 10.5,
+            "corners_so_far": 1,
+            "pred_prob": 0.9643,
+            "conf_triplet": [
+              0.9643,
+              0.9603,
+              0.8558
+            ],
+            "line_triplet": [
+              10.5,
+              10.5,
+              10.0
+            ]
+          },
+          {
+            "start_index": 4,
+            "start_minute": 6,
+            "end_minute": 8,
+            "side": "under",
+            "line": 10.5,
+            "corners_so_far": 1,
+            "pred_prob": 0.9603,
+            "conf_triplet": [
+              0.9603,
+              0.8558,
+              0.8502
+            ],
+            "line_triplet": [
+              10.5,
+              10.0,
+              10.0
+            ]
+          },
+          {
+            "start_index": 5,
+            "start_minute": 7,
+            "end_minute": 9,
+            "side": "under",
+            "line": 10.0,
+            "corners_so_far": 1,
+            "pred_prob": 0.8558,
+            "conf_triplet": [
+              0.8558,
+              0.8502,
+              0.8489
+            ],
+            "line_triplet": [
+              10.0,
+              10.0,
+              10.0
+            ]
+          },
+          {
+            "start_index": 6,
+            "start_minute": 8,
+            "end_minute": 10,
+            "side": "under",
+            "line": 10.0,
+            "corners_so_far": 1,
+            "pred_prob": 0.8502,
+            "conf_triplet": [
+              0.8502,
+              0.8489,
+              0.8437
+            ],
+            "line_triplet": [
+              10.0,
+              10.0,
+              10.0
+            ]
+          },
+          {
+            "start_index": 18,
+            "start_minute": 20,
+            "end_minute": 22,
+            "side": "under",
+            "line": 10.0,
+            "corners_so_far": 2,
+            "pred_prob": 0.8291,
+            "conf_triplet": [
+              0.8291,
+              0.8261,
+              0.8082
+            ],
+            "line_triplet": [
+              10.0,
+              9.5,
+              9.5
+            ]
+          },
+          {
+            "start_index": 19,
+            "start_minute": 21,
+            "end_minute": 23,
             "side": "under",
             "line": 9.5,
-            "corners_so_far": 1,
-            "pred_prob": 0.9151,
+            "corners_so_far": 2,
+            "pred_prob": 0.8261,
             "conf_triplet": [
-              0.9151,
-              0.9184,
-              0.9237
+              0.8261,
+              0.8082,
+              0.8216
             ],
             "line_triplet": [
               9.5,
@@ -1121,312 +481,1199 @@
           },
           {
             "start_index": 20,
-            "start_minute": 32,
-            "end_minute": 34,
-            "side": "over",
-            "line": 6.5,
-            "corners_so_far": 1,
-            "pred_prob": 0.9379,
+            "start_minute": 22,
+            "end_minute": 25,
+            "side": "under",
+            "line": 9.5,
+            "corners_so_far": 2,
+            "pred_prob": 0.8082,
             "conf_triplet": [
-              0.9379,
-              0.9598,
-              0.9267
+              0.8082,
+              0.8216,
+              0.8316
             ],
             "line_triplet": [
-              6.5,
-              6.5,
+              9.5,
+              9.5,
+              9.5
+            ]
+          },
+          {
+            "start_index": 41,
+            "start_minute": 47,
+            "end_minute": 49,
+            "side": "over",
+            "line": 7.5,
+            "corners_so_far": 3,
+            "pred_prob": 0.9302,
+            "conf_triplet": [
+              0.9302,
+              0.9481,
+              0.951
+            ],
+            "line_triplet": [
+              7.5,
+              7.5,
               7.5
             ]
           },
           {
-            "start_index": 21,
-            "start_minute": 33,
-            "end_minute": 35,
+            "start_index": 42,
+            "start_minute": 48,
+            "end_minute": 50,
             "side": "over",
-            "line": 6.5,
-            "corners_so_far": 1,
-            "pred_prob": 0.9598,
+            "line": 7.5,
+            "corners_so_far": 3,
+            "pred_prob": 0.9481,
             "conf_triplet": [
-              0.9598,
-              0.9267,
-              0.9161
+              0.9481,
+              0.951,
+              0.9653
             ],
             "line_triplet": [
-              6.5,
+              7.5,
               7.5,
               7.5
+            ]
+          },
+          {
+            "start_index": 43,
+            "start_minute": 49,
+            "end_minute": 51,
+            "side": "over",
+            "line": 7.5,
+            "corners_so_far": 3,
+            "pred_prob": 0.951,
+            "conf_triplet": [
+              0.951,
+              0.9653,
+              0.9129
+            ],
+            "line_triplet": [
+              7.5,
+              7.5,
+              8.5
+            ]
+          },
+          {
+            "start_index": 44,
+            "start_minute": 50,
+            "end_minute": 52,
+            "side": "over",
+            "line": 7.5,
+            "corners_so_far": 3,
+            "pred_prob": 0.9653,
+            "conf_triplet": [
+              0.9653,
+              0.9129,
+              0.9089
+            ],
+            "line_triplet": [
+              7.5,
+              8.5,
+              8.5
             ]
           }
         ]
       },
-      "final_total_proxy_from_page": 2,
+      "final_total_proxy_from_page": 5,
       "final_relation_proxy": "under",
-      "hit_proxy": false,
+      "hit_proxy": true,
       "sticky_triggered": true,
-      "sticky_minute": 14,
+      "sticky_minute": 3,
       "sticky_side": "under",
-      "sticky_prob": 0.9151,
-      "sticky_line": 9.5,
+      "sticky_prob": 0.9599,
+      "sticky_line": 10.5,
       "sticky_corners_so_far": 1,
       "sticky_relation": "under",
       "sticky_hit": true,
       "minute_rows_last10": [
         {
-          "minute": 26,
+          "minute": 46,
           "line": 8.0,
-          "corners_so_far": 1,
+          "corners_so_far": 3,
           "pred": "over",
-          "p_under": 0.2944,
-          "p_push": 0.2194,
-          "p_over": 0.4862
+          "p_under": 0.0467,
+          "p_push": 0.2045,
+          "p_over": 0.7488
         },
         {
-          "minute": 27,
-          "line": 8.0,
-          "corners_so_far": 1,
-          "pred": "over",
-          "p_under": 0.2965,
-          "p_push": 0.2118,
-          "p_over": 0.4917
-        },
-        {
-          "minute": 32,
-          "line": 6.5,
-          "corners_so_far": 1,
-          "pred": "over",
-          "p_under": 0.0621,
-          "p_push": 0.0,
-          "p_over": 0.9379
-        },
-        {
-          "minute": 33,
-          "line": 6.5,
-          "corners_so_far": 1,
-          "pred": "over",
-          "p_under": 0.0402,
-          "p_push": 0.0,
-          "p_over": 0.9598
-        },
-        {
-          "minute": 34,
+          "minute": 47,
           "line": 7.5,
-          "corners_so_far": 2,
+          "corners_so_far": 3,
           "pred": "over",
-          "p_under": 0.0733,
+          "p_under": 0.0698,
           "p_push": 0.0,
-          "p_over": 0.9267
+          "p_over": 0.9302
         },
         {
-          "minute": 35,
+          "minute": 48,
           "line": 7.5,
-          "corners_so_far": 2,
+          "corners_so_far": 3,
           "pred": "over",
-          "p_under": 0.0839,
+          "p_under": 0.0518,
           "p_push": 0.0,
-          "p_over": 0.9161
+          "p_over": 0.9481
         },
         {
-          "minute": 36,
-          "line": 7.0,
-          "corners_so_far": 2,
+          "minute": 49,
+          "line": 7.5,
+          "corners_so_far": 3,
           "pred": "over",
-          "p_under": 0.0425,
-          "p_push": 0.1653,
-          "p_over": 0.7921
+          "p_under": 0.049,
+          "p_push": 0.0,
+          "p_over": 0.951
         },
         {
-          "minute": 37,
-          "line": 8.0,
-          "corners_so_far": 2,
+          "minute": 50,
+          "line": 7.5,
+          "corners_so_far": 3,
           "pred": "over",
-          "p_under": 0.1743,
-          "p_push": 0.2036,
-          "p_over": 0.6221
+          "p_under": 0.0347,
+          "p_push": 0.0,
+          "p_over": 0.9653
         },
         {
-          "minute": 38,
-          "line": 8.0,
-          "corners_so_far": 2,
+          "minute": 51,
+          "line": 8.5,
+          "corners_so_far": 4,
           "pred": "over",
-          "p_under": 0.2335,
-          "p_push": 0.2211,
-          "p_over": 0.5453
+          "p_under": 0.0871,
+          "p_push": 0.0,
+          "p_over": 0.9129
         },
         {
-          "minute": 39,
-          "line": 8.0,
-          "corners_so_far": 2,
+          "minute": 52,
+          "line": 8.5,
+          "corners_so_far": 4,
           "pred": "over",
-          "p_under": 0.2737,
-          "p_push": 0.2187,
-          "p_over": 0.5076
+          "p_under": 0.0911,
+          "p_push": 0.0,
+          "p_over": 0.9089
+        },
+        {
+          "minute": 53,
+          "line": 9.5,
+          "corners_so_far": 5,
+          "pred": "over",
+          "p_under": 0.4576,
+          "p_push": 0.0,
+          "p_over": 0.5424
+        },
+        {
+          "minute": 54,
+          "line": 9.0,
+          "corners_so_far": 5,
+          "pred": "over",
+          "p_under": 0.3892,
+          "p_push": 0.2181,
+          "p_over": 0.3926
+        },
+        {
+          "minute": 55,
+          "line": 9.0,
+          "corners_so_far": 5,
+          "pred": "under",
+          "p_under": 0.4038,
+          "p_push": 0.2069,
+          "p_over": 0.3893
         }
       ],
-      "league_name": "加尔联",
-      "kickoff_time": "17:30",
-      "current_score": "2-1",
+      "league_name": "乌拉后备",
+      "kickoff_time": "20:30",
+      "current_score": "0-0",
       "current_corner_score": "0-0",
-      "final_total_corners": 2,
+      "final_total_corners": 5,
       "is_finished": true
     },
     {
-      "match_id": "2997201",
-      "home_team_name": "陶翰KSN女足",
-      "away_team_name": "丰富府里女足",
-      "latest_minute": 14,
-      "latest_line": 6.5,
+      "match_id": "3010120",
+      "home_team_name": "切尔诺夫策",
+      "away_team_name": "LNZ切尔卡斯",
+      "latest_minute": 51,
+      "latest_line": 3.5,
       "latest_corners_so_far": 0,
       "latest_pred": "over",
-      "latest_p_under": 0.0807,
+      "latest_p_under": 0.0152,
       "latest_p_push": 0.0,
-      "latest_p_over": 0.9193,
-      "triggered": false,
-      "trigger_minute": null,
-      "line": null,
-      "corners_so_far": null,
-      "pred_side": null,
-      "pred_prob": null,
-      "first_entry_minute": null,
-      "first_entry_line": null,
-      "first_entry_side": null,
-      "first_entry_prob": null,
-      "first_entry_text": null,
-      "line_changes": 3,
-      "opp_conf_max_after": null,
-      "risk_flag": null,
-      "risk_reasons": [],
-      "risk_alert": false,
-      "risk_alert_text": "none",
-      "risk_events": [],
-      "hedge_recommended": false,
-      "hedge_minute": null,
-      "hedge_line": null,
-      "hedge_side": null,
-      "hedge_prob": null,
-      "hedge_text": null,
-      "all_triggers": [],
-      "trigger_summary": {},
-      "final_total_proxy_from_page": 0,
-      "final_relation_proxy": null,
-      "hit_proxy": null,
-      "sticky_triggered": false,
-      "sticky_minute": null,
-      "sticky_side": null,
-      "sticky_prob": null,
-      "sticky_line": null,
-      "sticky_corners_so_far": null,
-      "sticky_relation": null,
-      "sticky_hit": null,
-      "minute_rows_last10": [
+      "latest_p_over": 0.9848,
+      "triggered": true,
+      "trigger_minute": 1,
+      "line": 8.5,
+      "corners_so_far": 0,
+      "pred_side": "under",
+      "pred_prob": 0.931,
+      "first_entry_minute": 1,
+      "first_entry_line": 8.5,
+      "first_entry_side": "under",
+      "first_entry_prob": 0.931,
+      "first_entry_text": "1' under 8.5-8.5 (avg conf: 0.9310, 3 triggers)",
+      "line_changes": 10,
+      "opp_conf_max_after": 0.9848,
+      "risk_flag": 1,
+      "risk_reasons": [
+        "strong_opposite_after_trigger"
+      ],
+      "risk_alert": true,
+      "risk_alert_text": "reasons=strong_opposite_after_trigger | hedge=49' over 4.0 (0.8098)",
+      "risk_events": [
         {
-          "minute": 5,
-          "line": 7.5,
-          "corners_so_far": 0,
-          "pred": "under",
-          "p_under": 0.7455,
-          "p_push": 0.0,
-          "p_over": 0.2545
-        },
-        {
-          "minute": 6,
-          "line": 7.5,
-          "corners_so_far": 0,
-          "pred": "under",
-          "p_under": 0.7414,
-          "p_push": 0.0,
-          "p_over": 0.2586
-        },
-        {
-          "minute": 7,
-          "line": 7.0,
-          "corners_so_far": 0,
-          "pred": "over",
-          "p_under": 0.2913,
-          "p_push": 0.2514,
-          "p_over": 0.4573
-        },
-        {
-          "minute": 8,
-          "line": 7.0,
-          "corners_so_far": 0,
-          "pred": "over",
-          "p_under": 0.2733,
-          "p_push": 0.2495,
-          "p_over": 0.4773
-        },
-        {
-          "minute": 9,
-          "line": 7.0,
-          "corners_so_far": 0,
-          "pred": "over",
-          "p_under": 0.2699,
-          "p_push": 0.2479,
-          "p_over": 0.4822
-        },
-        {
-          "minute": 10,
-          "line": 7.0,
-          "corners_so_far": 0,
-          "pred": "over",
-          "p_under": 0.2617,
-          "p_push": 0.2456,
-          "p_over": 0.4927
-        },
-        {
-          "minute": 11,
-          "line": 7.0,
-          "corners_so_far": 0,
-          "pred": "over",
-          "p_under": 0.2225,
-          "p_push": 0.2446,
-          "p_over": 0.533
-        },
-        {
-          "minute": 12,
-          "line": 7.0,
-          "corners_so_far": 0,
-          "pred": "over",
-          "p_under": 0.2217,
-          "p_push": 0.2136,
-          "p_over": 0.5647
-        },
-        {
-          "minute": 13,
-          "line": 6.5,
-          "corners_so_far": 0,
-          "pred": "over",
-          "p_under": 0.096,
-          "p_push": 0.0,
-          "p_over": 0.904
-        },
-        {
-          "minute": 14,
-          "line": 6.5,
-          "corners_so_far": 0,
-          "pred": "over",
-          "p_under": 0.0807,
-          "p_push": 0.0,
-          "p_over": 0.9193
+          "type": "opposite_trigger",
+          "minute": 49,
+          "line": 4.0,
+          "side": "over",
+          "prob": 0.8098
         }
       ],
-      "league_name": "越女联",
-      "kickoff_time": "18:00",
+      "hedge_recommended": true,
+      "hedge_minute": 49,
+      "hedge_line": 4.0,
+      "hedge_side": "over",
+      "hedge_prob": 0.8098,
+      "hedge_text": "49' over 4.0 (0.8098)",
+      "all_triggers": [
+        {
+          "start_index": 0,
+          "start_minute": 1,
+          "end_minute": 3,
+          "side": "under",
+          "line": 8.5,
+          "corners_so_far": 0,
+          "pred_prob": 0.9302,
+          "conf_triplet": [
+            0.9302,
+            0.9306,
+            0.9321
+          ],
+          "line_triplet": [
+            8.5,
+            8.5,
+            8.5
+          ]
+        },
+        {
+          "start_index": 1,
+          "start_minute": 2,
+          "end_minute": 4,
+          "side": "under",
+          "line": 8.5,
+          "corners_so_far": 0,
+          "pred_prob": 0.9306,
+          "conf_triplet": [
+            0.9306,
+            0.9321,
+            0.9347
+          ],
+          "line_triplet": [
+            8.5,
+            8.5,
+            8.5
+          ]
+        },
+        {
+          "start_index": 2,
+          "start_minute": 3,
+          "end_minute": 5,
+          "side": "under",
+          "line": 8.5,
+          "corners_so_far": 0,
+          "pred_prob": 0.9321,
+          "conf_triplet": [
+            0.9321,
+            0.9347,
+            0.9322
+          ],
+          "line_triplet": [
+            8.5,
+            8.5,
+            8.5
+          ]
+        },
+        {
+          "start_index": 45,
+          "start_minute": 49,
+          "end_minute": 51,
+          "side": "over",
+          "line": 4.0,
+          "corners_so_far": 0,
+          "pred_prob": 0.8098,
+          "conf_triplet": [
+            0.8098,
+            0.8139,
+            0.9848
+          ],
+          "line_triplet": [
+            4.0,
+            4.0,
+            3.5
+          ]
+        }
+      ],
+      "trigger_summary": {
+        "dominant_side": "under",
+        "trigger_count": 3,
+        "trigger_interval": [
+          8.5,
+          8.5
+        ],
+        "interval_width": 0.0,
+        "weighted_recommended_line": 8.5,
+        "average_confidence": 0.931,
+        "stability_rating": "high",
+        "has_opposite_triggers": true,
+        "opposite_trigger_count": 1,
+        "all_triggers": [
+          {
+            "start_index": 0,
+            "start_minute": 1,
+            "end_minute": 3,
+            "side": "under",
+            "line": 8.5,
+            "corners_so_far": 0,
+            "pred_prob": 0.9302,
+            "conf_triplet": [
+              0.9302,
+              0.9306,
+              0.9321
+            ],
+            "line_triplet": [
+              8.5,
+              8.5,
+              8.5
+            ]
+          },
+          {
+            "start_index": 1,
+            "start_minute": 2,
+            "end_minute": 4,
+            "side": "under",
+            "line": 8.5,
+            "corners_so_far": 0,
+            "pred_prob": 0.9306,
+            "conf_triplet": [
+              0.9306,
+              0.9321,
+              0.9347
+            ],
+            "line_triplet": [
+              8.5,
+              8.5,
+              8.5
+            ]
+          },
+          {
+            "start_index": 2,
+            "start_minute": 3,
+            "end_minute": 5,
+            "side": "under",
+            "line": 8.5,
+            "corners_so_far": 0,
+            "pred_prob": 0.9321,
+            "conf_triplet": [
+              0.9321,
+              0.9347,
+              0.9322
+            ],
+            "line_triplet": [
+              8.5,
+              8.5,
+              8.5
+            ]
+          },
+          {
+            "start_index": 45,
+            "start_minute": 49,
+            "end_minute": 51,
+            "side": "over",
+            "line": 4.0,
+            "corners_so_far": 0,
+            "pred_prob": 0.8098,
+            "conf_triplet": [
+              0.8098,
+              0.8139,
+              0.9848
+            ],
+            "line_triplet": [
+              4.0,
+              4.0,
+              3.5
+            ]
+          }
+        ]
+      },
+      "final_total_proxy_from_page": 0,
+      "final_relation_proxy": "under",
+      "hit_proxy": true,
+      "sticky_triggered": true,
+      "sticky_minute": 1,
+      "sticky_side": "under",
+      "sticky_prob": 0.9302,
+      "sticky_line": 8.5,
+      "sticky_corners_so_far": 0,
+      "sticky_relation": "under",
+      "sticky_hit": true,
+      "minute_rows_last10": [
+        {
+          "minute": 42,
+          "line": 5.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.1865,
+          "p_push": 0.2515,
+          "p_over": 0.562
+        },
+        {
+          "minute": 43,
+          "line": 4.5,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.2193,
+          "p_push": 0.0,
+          "p_over": 0.7807
+        },
+        {
+          "minute": 44,
+          "line": 4.5,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.1998,
+          "p_push": 0.0,
+          "p_over": 0.8002
+        },
+        {
+          "minute": 45,
+          "line": 4.5,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.1668,
+          "p_push": 0.0,
+          "p_over": 0.8332
+        },
+        {
+          "minute": 46,
+          "line": 4.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.0516,
+          "p_push": 0.1737,
+          "p_over": 0.7747
+        },
+        {
+          "minute": 47,
+          "line": 4.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.0402,
+          "p_push": 0.1746,
+          "p_over": 0.7852
+        },
+        {
+          "minute": 48,
+          "line": 4.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.0308,
+          "p_push": 0.1771,
+          "p_over": 0.7921
+        },
+        {
+          "minute": 49,
+          "line": 4.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.0236,
+          "p_push": 0.1666,
+          "p_over": 0.8098
+        },
+        {
+          "minute": 50,
+          "line": 4.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.0218,
+          "p_push": 0.1644,
+          "p_over": 0.8139
+        },
+        {
+          "minute": 51,
+          "line": 3.5,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.0152,
+          "p_push": 0.0,
+          "p_over": 0.9848
+        }
+      ],
+      "league_name": "乌克超",
+      "kickoff_time": "20:30",
       "current_score": "0-0",
       "current_corner_score": "0-0",
       "final_total_corners": 0,
       "is_finished": true
     },
     {
-      "match_id": "2997200",
-      "home_team_name": "胡志明市B队女足",
-      "away_team_name": "河内B队女足",
-      "latest_minute": 8,
-      "latest_line": 7.0,
+      "match_id": "3054151",
+      "home_team_name": "阿尔比恩后备队",
+      "away_team_name": "尤文图德德拉后备队",
+      "latest_minute": 44,
+      "latest_line": 8.0,
+      "latest_corners_so_far": 3,
+      "latest_pred": "over",
+      "latest_p_under": 0.1792,
+      "latest_p_push": 0.2065,
+      "latest_p_over": 0.6142,
+      "triggered": true,
+      "trigger_minute": 25,
+      "line": 7.5,
+      "corners_so_far": 1,
+      "pred_side": "over",
+      "pred_prob": 0.939,
+      "first_entry_minute": 25,
+      "first_entry_line": 7.5,
+      "first_entry_side": "over",
+      "first_entry_prob": 0.939,
+      "first_entry_text": "25' over 7.5-7.5 (avg conf: 0.9390, 1 triggers)",
+      "line_changes": 11,
+      "opp_conf_max_after": 0.9567,
+      "risk_flag": 2,
+      "risk_reasons": [
+        "strong_opposite_after_trigger",
+        "single_trigger_point"
+      ],
+      "risk_alert": true,
+      "risk_alert_text": "reasons=strong_opposite_after_trigger,single_trigger_point | hedge=37' under 9.0 (0.9567)",
+      "risk_events": [
+        {
+          "type": "opposite_trigger",
+          "minute": 37,
+          "line": 9.0,
+          "side": "under",
+          "prob": 0.9567
+        }
+      ],
+      "hedge_recommended": true,
+      "hedge_minute": 37,
+      "hedge_line": 9.0,
+      "hedge_side": "under",
+      "hedge_prob": 0.9567,
+      "hedge_text": "37' under 9.0 (0.9567)",
+      "all_triggers": [
+        {
+          "start_index": 21,
+          "start_minute": 25,
+          "end_minute": 27,
+          "side": "over",
+          "line": 7.5,
+          "corners_so_far": 1,
+          "pred_prob": 0.939,
+          "conf_triplet": [
+            0.939,
+            0.9419,
+            0.9481
+          ],
+          "line_triplet": [
+            7.5,
+            7.5,
+            7.5
+          ]
+        },
+        {
+          "start_index": 32,
+          "start_minute": 37,
+          "end_minute": 40,
+          "side": "under",
+          "line": 9.0,
+          "corners_so_far": 3,
+          "pred_prob": 0.9567,
+          "conf_triplet": [
+            0.9567,
+            0.9104,
+            0.9238
+          ],
+          "line_triplet": [
+            9.0,
+            8.5,
+            8.5
+          ]
+        }
+      ],
+      "trigger_summary": {
+        "dominant_side": "over",
+        "trigger_count": 1,
+        "trigger_interval": [
+          7.5,
+          7.5
+        ],
+        "interval_width": 0.0,
+        "weighted_recommended_line": 7.5,
+        "average_confidence": 0.939,
+        "stability_rating": "high",
+        "has_opposite_triggers": true,
+        "opposite_trigger_count": 1,
+        "all_triggers": [
+          {
+            "start_index": 21,
+            "start_minute": 25,
+            "end_minute": 27,
+            "side": "over",
+            "line": 7.5,
+            "corners_so_far": 1,
+            "pred_prob": 0.939,
+            "conf_triplet": [
+              0.939,
+              0.9419,
+              0.9481
+            ],
+            "line_triplet": [
+              7.5,
+              7.5,
+              7.5
+            ]
+          },
+          {
+            "start_index": 32,
+            "start_minute": 37,
+            "end_minute": 40,
+            "side": "under",
+            "line": 9.0,
+            "corners_so_far": 3,
+            "pred_prob": 0.9567,
+            "conf_triplet": [
+              0.9567,
+              0.9104,
+              0.9238
+            ],
+            "line_triplet": [
+              9.0,
+              8.5,
+              8.5
+            ]
+          }
+        ]
+      },
+      "final_total_proxy_from_page": 3,
+      "final_relation_proxy": "under",
+      "hit_proxy": false,
+      "sticky_triggered": true,
+      "sticky_minute": 25,
+      "sticky_side": "over",
+      "sticky_prob": 0.939,
+      "sticky_line": 7.5,
+      "sticky_corners_so_far": 1,
+      "sticky_relation": "under",
+      "sticky_hit": false,
+      "minute_rows_last10": [
+        {
+          "minute": 32,
+          "line": 8.0,
+          "corners_so_far": 2,
+          "pred": "over",
+          "p_under": 0.1437,
+          "p_push": 0.2081,
+          "p_over": 0.6482
+        },
+        {
+          "minute": 33,
+          "line": 8.0,
+          "corners_so_far": 2,
+          "pred": "over",
+          "p_under": 0.1489,
+          "p_push": 0.2125,
+          "p_over": 0.6386
+        },
+        {
+          "minute": 34,
+          "line": 8.0,
+          "corners_so_far": 2,
+          "pred": "over",
+          "p_under": 0.1397,
+          "p_push": 0.1995,
+          "p_over": 0.6608
+        },
+        {
+          "minute": 35,
+          "line": 8.0,
+          "corners_so_far": 2,
+          "pred": "over",
+          "p_under": 0.2002,
+          "p_push": 0.2119,
+          "p_over": 0.5879
+        },
+        {
+          "minute": 36,
+          "line": 7.5,
+          "corners_so_far": 2,
+          "pred": "over",
+          "p_under": 0.0518,
+          "p_push": 0.0,
+          "p_over": 0.9482
+        },
+        {
+          "minute": 37,
+          "line": 9.0,
+          "corners_so_far": 3,
+          "pred": "under",
+          "p_under": 0.9567,
+          "p_push": 0.0303,
+          "p_over": 0.013
+        },
+        {
+          "minute": 39,
+          "line": 8.5,
+          "corners_so_far": 3,
+          "pred": "under",
+          "p_under": 0.9104,
+          "p_push": 0.0,
+          "p_over": 0.0896
+        },
+        {
+          "minute": 40,
+          "line": 8.5,
+          "corners_so_far": 3,
+          "pred": "under",
+          "p_under": 0.9238,
+          "p_push": 0.0,
+          "p_over": 0.0762
+        },
+        {
+          "minute": 43,
+          "line": 8.0,
+          "corners_so_far": 3,
+          "pred": "over",
+          "p_under": 0.2014,
+          "p_push": 0.2177,
+          "p_over": 0.581
+        },
+        {
+          "minute": 44,
+          "line": 8.0,
+          "corners_so_far": 3,
+          "pred": "over",
+          "p_under": 0.1792,
+          "p_push": 0.2065,
+          "p_over": 0.6142
+        }
+      ],
+      "league_name": "乌拉后备",
+      "kickoff_time": "21:00",
+      "current_score": "2-0",
+      "current_corner_score": "0-0",
+      "final_total_corners": 3,
+      "is_finished": true
+    },
+    {
+      "match_id": "3054160",
+      "home_team_name": "石油独立女足",
+      "away_team_name": "皇家帕托斯女足",
+      "latest_minute": 39,
+      "latest_line": 4.5,
       "latest_corners_so_far": 0,
       "latest_pred": "over",
-      "latest_p_under": 0.0823,
-      "latest_p_push": 0.151,
-      "latest_p_over": 0.7667,
+      "latest_p_under": 0.0652,
+      "latest_p_push": 0.0,
+      "latest_p_over": 0.9348,
+      "triggered": true,
+      "trigger_minute": 1,
+      "line": 7.7,
+      "corners_so_far": 0,
+      "pred_side": "under",
+      "pred_prob": 0.9548,
+      "first_entry_minute": 1,
+      "first_entry_line": 7.7,
+      "first_entry_side": "under",
+      "first_entry_prob": 0.9548,
+      "first_entry_text": "1' under 7.5-8.0 (avg conf: 0.9548, 3 triggers)",
+      "line_changes": 7,
+      "opp_conf_max_after": 0.9348,
+      "risk_flag": 2,
+      "risk_reasons": [
+        "strong_opposite_after_trigger",
+        "multiple_opposite_triggers"
+      ],
+      "risk_alert": true,
+      "risk_alert_text": "reasons=strong_opposite_after_trigger,multiple_opposite_triggers | hedge=35' over 4.5 (0.8869)",
+      "risk_events": [
+        {
+          "type": "opposite_trigger",
+          "minute": 35,
+          "line": 4.5,
+          "side": "over",
+          "prob": 0.8869
+        }
+      ],
+      "hedge_recommended": true,
+      "hedge_minute": 35,
+      "hedge_line": 4.5,
+      "hedge_side": "over",
+      "hedge_prob": 0.8869,
+      "hedge_text": "35' over 4.5 (0.8869)",
+      "all_triggers": [
+        {
+          "start_index": 0,
+          "start_minute": 1,
+          "end_minute": 3,
+          "side": "under",
+          "line": 8.0,
+          "corners_so_far": 0,
+          "pred_prob": 0.9531,
+          "conf_triplet": [
+            0.9531,
+            0.9485,
+            0.9629
+          ],
+          "line_triplet": [
+            8.0,
+            7.5,
+            7.5
+          ]
+        },
+        {
+          "start_index": 1,
+          "start_minute": 2,
+          "end_minute": 6,
+          "side": "under",
+          "line": 7.5,
+          "corners_so_far": 0,
+          "pred_prob": 0.9485,
+          "conf_triplet": [
+            0.9485,
+            0.9629,
+            0.966
+          ],
+          "line_triplet": [
+            7.5,
+            7.5,
+            7.5
+          ]
+        },
+        {
+          "start_index": 2,
+          "start_minute": 3,
+          "end_minute": 7,
+          "side": "under",
+          "line": 7.5,
+          "corners_so_far": 0,
+          "pred_prob": 0.9629,
+          "conf_triplet": [
+            0.9629,
+            0.966,
+            0.9679
+          ],
+          "line_triplet": [
+            7.5,
+            7.5,
+            7.5
+          ]
+        },
+        {
+          "start_index": 31,
+          "start_minute": 35,
+          "end_minute": 37,
+          "side": "over",
+          "line": 4.5,
+          "corners_so_far": 0,
+          "pred_prob": 0.8869,
+          "conf_triplet": [
+            0.8869,
+            0.9008,
+            0.9046
+          ],
+          "line_triplet": [
+            4.5,
+            4.5,
+            4.5
+          ]
+        },
+        {
+          "start_index": 32,
+          "start_minute": 36,
+          "end_minute": 38,
+          "side": "over",
+          "line": 4.5,
+          "corners_so_far": 0,
+          "pred_prob": 0.9008,
+          "conf_triplet": [
+            0.9008,
+            0.9046,
+            0.9175
+          ],
+          "line_triplet": [
+            4.5,
+            4.5,
+            4.5
+          ]
+        },
+        {
+          "start_index": 33,
+          "start_minute": 37,
+          "end_minute": 39,
+          "side": "over",
+          "line": 4.5,
+          "corners_so_far": 0,
+          "pred_prob": 0.9046,
+          "conf_triplet": [
+            0.9046,
+            0.9175,
+            0.9348
+          ],
+          "line_triplet": [
+            4.5,
+            4.5,
+            4.5
+          ]
+        }
+      ],
+      "trigger_summary": {
+        "dominant_side": "under",
+        "trigger_count": 3,
+        "trigger_interval": [
+          7.5,
+          8.0
+        ],
+        "interval_width": 0.5,
+        "weighted_recommended_line": 7.65,
+        "average_confidence": 0.9548,
+        "stability_rating": "high",
+        "has_opposite_triggers": true,
+        "opposite_trigger_count": 3,
+        "all_triggers": [
+          {
+            "start_index": 0,
+            "start_minute": 1,
+            "end_minute": 3,
+            "side": "under",
+            "line": 8.0,
+            "corners_so_far": 0,
+            "pred_prob": 0.9531,
+            "conf_triplet": [
+              0.9531,
+              0.9485,
+              0.9629
+            ],
+            "line_triplet": [
+              8.0,
+              7.5,
+              7.5
+            ]
+          },
+          {
+            "start_index": 1,
+            "start_minute": 2,
+            "end_minute": 6,
+            "side": "under",
+            "line": 7.5,
+            "corners_so_far": 0,
+            "pred_prob": 0.9485,
+            "conf_triplet": [
+              0.9485,
+              0.9629,
+              0.966
+            ],
+            "line_triplet": [
+              7.5,
+              7.5,
+              7.5
+            ]
+          },
+          {
+            "start_index": 2,
+            "start_minute": 3,
+            "end_minute": 7,
+            "side": "under",
+            "line": 7.5,
+            "corners_so_far": 0,
+            "pred_prob": 0.9629,
+            "conf_triplet": [
+              0.9629,
+              0.966,
+              0.9679
+            ],
+            "line_triplet": [
+              7.5,
+              7.5,
+              7.5
+            ]
+          },
+          {
+            "start_index": 31,
+            "start_minute": 35,
+            "end_minute": 37,
+            "side": "over",
+            "line": 4.5,
+            "corners_so_far": 0,
+            "pred_prob": 0.8869,
+            "conf_triplet": [
+              0.8869,
+              0.9008,
+              0.9046
+            ],
+            "line_triplet": [
+              4.5,
+              4.5,
+              4.5
+            ]
+          },
+          {
+            "start_index": 32,
+            "start_minute": 36,
+            "end_minute": 38,
+            "side": "over",
+            "line": 4.5,
+            "corners_so_far": 0,
+            "pred_prob": 0.9008,
+            "conf_triplet": [
+              0.9008,
+              0.9046,
+              0.9175
+            ],
+            "line_triplet": [
+              4.5,
+              4.5,
+              4.5
+            ]
+          },
+          {
+            "start_index": 33,
+            "start_minute": 37,
+            "end_minute": 39,
+            "side": "over",
+            "line": 4.5,
+            "corners_so_far": 0,
+            "pred_prob": 0.9046,
+            "conf_triplet": [
+              0.9046,
+              0.9175,
+              0.9348
+            ],
+            "line_triplet": [
+              4.5,
+              4.5,
+              4.5
+            ]
+          }
+        ]
+      },
+      "final_total_proxy_from_page": 0,
+      "final_relation_proxy": "under",
+      "hit_proxy": true,
+      "sticky_triggered": true,
+      "sticky_minute": 1,
+      "sticky_side": "under",
+      "sticky_prob": 0.9531,
+      "sticky_line": 8.0,
+      "sticky_corners_so_far": 0,
+      "sticky_relation": "under",
+      "sticky_hit": true,
+      "minute_rows_last10": [
+        {
+          "minute": 30,
+          "line": 5.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.2104,
+          "p_push": 0.2556,
+          "p_over": 0.534
+        },
+        {
+          "minute": 31,
+          "line": 5.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.1994,
+          "p_push": 0.25,
+          "p_over": 0.5506
+        },
+        {
+          "minute": 32,
+          "line": 5.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.1742,
+          "p_push": 0.2485,
+          "p_over": 0.5773
+        },
+        {
+          "minute": 33,
+          "line": 5.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.1542,
+          "p_push": 0.2367,
+          "p_over": 0.609
+        },
+        {
+          "minute": 34,
+          "line": 5.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.1548,
+          "p_push": 0.2341,
+          "p_over": 0.6112
+        },
+        {
+          "minute": 35,
+          "line": 4.5,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.1131,
+          "p_push": 0.0,
+          "p_over": 0.8869
+        },
+        {
+          "minute": 36,
+          "line": 4.5,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.0992,
+          "p_push": 0.0,
+          "p_over": 0.9008
+        },
+        {
+          "minute": 37,
+          "line": 4.5,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.0954,
+          "p_push": 0.0,
+          "p_over": 0.9046
+        },
+        {
+          "minute": 38,
+          "line": 4.5,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.0825,
+          "p_push": 0.0,
+          "p_over": 0.9175
+        },
+        {
+          "minute": 39,
+          "line": 4.5,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.0652,
+          "p_push": 0.0,
+          "p_over": 0.9348
+        }
+      ],
+      "league_name": "玻利女联",
+      "kickoff_time": "21:00",
+      "current_score": "2-1",
+      "current_corner_score": "0-0",
+      "final_total_corners": 0,
+      "is_finished": true
+    },
+    {
+      "match_id": "2991083",
+      "home_team_name": "印度尼西亚",
+      "away_team_name": "越南",
+      "latest_minute": 17,
+      "latest_line": 8.0,
+      "latest_corners_so_far": 0,
+      "latest_pred": "over",
+      "latest_p_under": 0.1245,
+      "latest_p_push": 0.1876,
+      "latest_p_over": 0.6879,
       "triggered": false,
       "trigger_minute": null,
       "line": null,
@@ -1438,7 +1685,7 @@
       "first_entry_side": null,
       "first_entry_prob": null,
       "first_entry_text": null,
-      "line_changes": 2,
+      "line_changes": 5,
       "opp_conf_max_after": null,
       "risk_flag": null,
       "risk_reasons": [],
@@ -1466,71 +1713,98 @@
       "sticky_hit": null,
       "minute_rows_last10": [
         {
-          "minute": 1,
-          "line": 8.0,
-          "corners_so_far": 0,
-          "pred": "under",
-          "p_under": 0.9564,
-          "p_push": 0.0311,
-          "p_over": 0.0125
-        },
-        {
-          "minute": 2,
-          "line": 7.5,
-          "corners_so_far": 0,
-          "pred": "under",
-          "p_under": 0.5961,
-          "p_push": 0.0,
-          "p_over": 0.4039
-        },
-        {
-          "minute": 3,
-          "line": 7.5,
-          "corners_so_far": 0,
-          "pred": "under",
-          "p_under": 0.5749,
-          "p_push": 0.0,
-          "p_over": 0.4251
-        },
-        {
-          "minute": 5,
-          "line": 7.5,
-          "corners_so_far": 0,
-          "pred": "under",
-          "p_under": 0.5316,
-          "p_push": 0.0,
-          "p_over": 0.4684
-        },
-        {
-          "minute": 6,
-          "line": 7.5,
-          "corners_so_far": 0,
-          "pred": "under",
-          "p_under": 0.509,
-          "p_push": 0.0,
-          "p_over": 0.491
-        },
-        {
-          "minute": 7,
-          "line": 7.5,
-          "corners_so_far": 0,
-          "pred": "under",
-          "p_under": 0.5128,
-          "p_push": 0.0,
-          "p_over": 0.4872
-        },
-        {
           "minute": 8,
-          "line": 7.0,
+          "line": 9.0,
+          "corners_so_far": 0,
+          "pred": "under",
+          "p_under": 0.6116,
+          "p_push": 0.1477,
+          "p_over": 0.2406
+        },
+        {
+          "minute": 9,
+          "line": 9.0,
+          "corners_so_far": 0,
+          "pred": "under",
+          "p_under": 0.6043,
+          "p_push": 0.1438,
+          "p_over": 0.2518
+        },
+        {
+          "minute": 10,
+          "line": 8.5,
           "corners_so_far": 0,
           "pred": "over",
-          "p_under": 0.0823,
-          "p_push": 0.151,
-          "p_over": 0.7667
+          "p_under": 0.4052,
+          "p_push": 0.0,
+          "p_over": 0.5948
+        },
+        {
+          "minute": 11,
+          "line": 8.5,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.3626,
+          "p_push": 0.0,
+          "p_over": 0.6374
+        },
+        {
+          "minute": 12,
+          "line": 8.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.1705,
+          "p_push": 0.2054,
+          "p_over": 0.6242
+        },
+        {
+          "minute": 13,
+          "line": 8.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.1533,
+          "p_push": 0.2012,
+          "p_over": 0.6455
+        },
+        {
+          "minute": 14,
+          "line": 7.5,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.0844,
+          "p_push": 0.0,
+          "p_over": 0.9156
+        },
+        {
+          "minute": 15,
+          "line": 7.5,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.0755,
+          "p_push": 0.0,
+          "p_over": 0.9245
+        },
+        {
+          "minute": 16,
+          "line": 8.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.1179,
+          "p_push": 0.2056,
+          "p_over": 0.6765
+        },
+        {
+          "minute": 17,
+          "line": 8.0,
+          "corners_so_far": 0,
+          "pred": "over",
+          "p_under": 0.1245,
+          "p_push": 0.1876,
+          "p_over": 0.6879
         }
       ],
-      "league_name": "越女联",
-      "kickoff_time": "17:00",
+      "league_name": "东南锦",
+      "kickoff_time": "21:30",
       "current_score": "0-2",
       "current_corner_score": "0-0",
       "final_total_corners": 0,
@@ -1542,42 +1816,85 @@
       "segment": "0-15",
       "seg_start": 0,
       "seg_end": 15,
-      "match_count": 2,
+      "match_count": 3,
       "hist_accuracy": 0.943,
       "rows": [
         {
-          "match_id": "2997199",
-          "home_team_name": "胡志明市女足",
-          "away_team_name": "河内女足",
-          "league_name": "越女联",
-          "kickoff_time": "17:00",
-          "current_score": "1-0",
+          "match_id": "3054157",
+          "home_team_name": "漫游者后备队",
+          "away_team_name": "波士顿河后备队",
+          "league_name": "乌拉后备",
+          "kickoff_time": "20:30",
+          "current_score": "0-0",
           "current_corner_score": "0-0",
-          "trigger_minute": 1,
+          "trigger_minute": 3,
           "pred_side": "under",
-          "line": 7.5,
-          "pred_prob": 0.9817,
-          "corners_so_far": 0,
+          "line": 10.5,
+          "pred_prob": 0.9599,
+          "corners_so_far": 1,
           "is_finished": false,
-          "final_total_corners": 1,
+          "final_total_corners": 5,
           "sticky_hit": true
         },
         {
-          "match_id": "3054163",
-          "home_team_name": "BSS体育俱乐部",
-          "away_team_name": "东孟加拉II",
-          "league_name": "加尔联",
-          "kickoff_time": "17:30",
+          "match_id": "3054160",
+          "home_team_name": "石油独立女足",
+          "away_team_name": "皇家帕托斯女足",
+          "league_name": "玻利女联",
+          "kickoff_time": "21:00",
           "current_score": "2-1",
           "current_corner_score": "0-0",
-          "trigger_minute": 14,
+          "trigger_minute": 1,
           "pred_side": "under",
-          "line": 9.5,
-          "pred_prob": 0.9151,
+          "line": 8.0,
+          "pred_prob": 0.9531,
+          "corners_so_far": 0,
+          "is_finished": false,
+          "final_total_corners": 0,
+          "sticky_hit": true
+        },
+        {
+          "match_id": "3010120",
+          "home_team_name": "切尔诺夫策",
+          "away_team_name": "LNZ切尔卡斯",
+          "league_name": "乌克超",
+          "kickoff_time": "20:30",
+          "current_score": "0-0",
+          "current_corner_score": "0-0",
+          "trigger_minute": 1,
+          "pred_side": "under",
+          "line": 8.5,
+          "pred_prob": 0.9302,
+          "corners_so_far": 0,
+          "is_finished": false,
+          "final_total_corners": 0,
+          "sticky_hit": true
+        }
+      ]
+    },
+    {
+      "segment": "15-30",
+      "seg_start": 15,
+      "seg_end": 30,
+      "match_count": 1,
+      "hist_accuracy": 0.936,
+      "rows": [
+        {
+          "match_id": "3054151",
+          "home_team_name": "阿尔比恩后备队",
+          "away_team_name": "尤文图德德拉后备队",
+          "league_name": "乌拉后备",
+          "kickoff_time": "21:00",
+          "current_score": "2-0",
+          "current_corner_score": "0-0",
+          "trigger_minute": 25,
+          "pred_side": "over",
+          "line": 7.5,
+          "pred_prob": 0.939,
           "corners_so_far": 1,
           "is_finished": false,
-          "final_total_corners": 2,
-          "sticky_hit": true
+          "final_total_corners": 3,
+          "sticky_hit": false
         }
       ]
     }
