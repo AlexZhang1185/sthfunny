@@ -115,16 +115,16 @@ def render_html(data):
             f'<td><b>{s["act"]}</b></td><td><b>{adv}</b></td><td>{s["overshoot"]:g} {badge}</td></tr>')
     body = "\n".join(rows) if rows else '<tr><td colspan=10 style="color:#888;padding:20px">当前无高置信实时预测（无进行中标的 / 未形成阶梯 / 数据源不可达）</td></tr>'
     note = html.escape(data.get("note","") or "")
-    doc=f"""<!doctype html><html lang=zh><head><meta charset=utf-8><meta http-equiv=refresh content=120>
+    doc=f"""<!doctype html><html lang=zh><head><meta charset=utf-8>
 <title>实时阶梯-GRU 高置信预测</title>
 <style>body{{font-family:-apple-system,Segoe UI,Arial;margin:20px;color:#222}}h1{{font-size:19px}}
 table{{border-collapse:collapse;width:100%;font-size:13px}}th,td{{border:1px solid #ddd;padding:6px 8px;text-align:center}}
 th{{background:#2b6cb0;color:#fff}} .sum{{background:#eef4ff;padding:12px 16px;border-radius:8px;line-height:1.9;margin:10px 0}}
 .note{{color:#666;font-size:12px;margin-top:10px;line-height:1.7}}</style></head><body>
-<h1>📊 实时进行中 · 阶梯-GRU 高置信预测</h1>
+<h1>📊 实时进行中 · 阶梯-GRU 高置信预测 <button onclick=\"location.reload()\" style=\"font-size:13px;padding:4px 12px;margin-left:10px;cursor:pointer;border:1px solid #2b6cb0;background:#fff;border-radius:6px\">🔄 手动刷新</button></h1>
 <div class=sum>更新时间(UTC): <b>{data.get('generated_at','')}</b> &nbsp;|&nbsp; 进行中标的: {data.get('feed_count','—')} &nbsp;|&nbsp; 高置信信号: <b>{len(sigs)}</b>
 {('&nbsp;|&nbsp; '+note) if note else ''}<br>
-口径: 阶梯(单步单调,≤40′成形)定初判 → GRU 输出 P(初判成立); P≥0.65 信原判 / ≤0.30 反手 / 中间弃权; overshoot≥{ANOM_D} 触发异常报警(对冲/弃权)。页面每120秒自动刷新。</div>
+口径: 阶梯(单步单调,≤40′成形)定初判 → GRU 输出 P(初判成立); P≥0.65 信原判 / ≤0.30 反手 / 中间弃权; overshoot≥{ANOM_D} 触发异常报警(对冲/弃权)。点击右上“手动刷新”获取最新。</div>
 <table><tr><th>ID</th><th>对阵</th><th>当前</th><th>阶梯</th><th>锚线</th><th>初判</th><th>P(成立)</th><th>决策</th><th>建议方向</th><th>后段位移/异常</th></tr>
 {body}</table>
 <div class=note>绿=信原判 橙=反手 灰=弃权。异常报警=出手后线继续朝阶梯方向 overshoot≥{ANOM_D},提示对冲或弃权。实时快照(CI 定时构建), 仅策略验证, 非投注建议。</div>
