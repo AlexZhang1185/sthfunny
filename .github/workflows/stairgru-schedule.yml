@@ -1,10 +1,8 @@
-name: Stairgru Schedule (runs on default branch so cron fires)
+name: Stairgru Build (manual, runs on default branch)
 # 说明: GitHub Actions 的 schedule 只执行【默认分支】上的工作流文件。stairgru.yml 只在 stair-gru
 # 分支, 定时永不触发。故在 main(默认分支)放本调度: checkout stair-gru 代码+模型 -> 生成 -> 部署 /stairgru/。
 on:
-  schedule:
-    - cron: "*/15 * * * *"
-  workflow_dispatch:
+  workflow_dispatch:   # 仅手动触发, 不再每15分钟自动构建
 permissions:
   contents: write
 concurrency:
