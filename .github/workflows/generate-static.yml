@@ -31,4 +31,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./static
-          force_orphan: true  # 保持gh-pages分支干净
+          keep_files: true  # 保留 /stairgru/ /sthnew/ 等子路径, 不整盘清空

@@ -1,0 +1,39 @@
+name: Stairgru Schedule (runs on default branch so cron fires)
+# 说明: GitHub Actions 的 schedule 只执行【默认分支】上的工作流文件。stairgru.yml 只在 stair-gru
+# 分支, 定时永不触发。故在 main(默认分支)放本调度: checkout stair-gru 代码+模型 -> 生成 -> 部署 /stairgru/。
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: stairgru-schedule
+  cancel-in-progress: false
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stair-gru          # 拉 stair-gru 分支的代码与模型
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - name: Install deps
+        run: pip install numpy pandas scikit-learn requests joblib "tensorflow-cpu==2.17.0" lxml beautifulsoup4
+      - name: Generate realtime predictions
+        env:
+          TZ: Asia/Shanghai
+          PYTHONUNBUFFERED: "1"
+          CURRENT_BUDGET_S: "900"
+          PYTHONPATH: "."
+        run: python strategy/generate_stairgru_live.py
+      - name: Deploy static_stair -> /stairgru/
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./static_stair
+          destination_dir: stairgru
+          keep_files: true
+          enable_jekyll: false
