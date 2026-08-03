@@ -12,6 +12,8 @@ from pipeline_e2e_v2 import load_jsonl, parse_asian_line, parse_corner_score_tot
 
 HOST="127.0.0.1"; PORT=8766
 MODELDIR="strategy/model"; MONTHLY_GLOB="data/monthly/raw_matches_*.jsonl"
+GOAL_FILE="/Users/bytedance/work/vivian/code/corner/data/raw_goal_matches_2026_full.jsonl"
+GOAL_TRAIN_CUT="20260501"   # 进球模型: <该日期 训练, 其余为样本外
 T_STAIR=40; TOBS=[45,55,65,75,85]; MAXLEN=40
 DEFAULT_STEP_TIMEOUT_S=900.0
 DEFAULT_LIVE_BUDGET_S=900.0
@@ -19,6 +21,8 @@ DEFAULT_LIVE_BUDGET_S=900.0
 _MDL=None; _MU=None; _SD=None; _LOCK=threading.Lock()
 _BYDATE=None; _DL=threading.Lock()
 _CACHE={}
+_GMDL=None; _GMU=None; _GSD=None; _GLOCK=threading.Lock()
+_GBYDATE=None; _GDL=threading.Lock(); _GCACHE={}
 _LIVE_CACHE={"ts":0.0,"data":None}
 _LIVE_BUILD_LOCK=threading.Lock()
 LIVE_TTL_S=30.0; ANOM_D=2.0
@@ -109,10 +113,7 @@ def _correct(fin,L,side):
     rel="over" if fin>L else ("under" if fin<L else "push")
     return 1 if rel==side else 0
 
-def build_date_payload(date8):
-    if date8 in _CACHE: return _CACHE[date8]
-    mdl,mu,sd=_model(); by=_load_monthly()
-    recs=by.get(date8,[])
+def _build_payload(date8, recs, mdl, mu, sd, fin_key):
     items=[]; batch=[]; idxmap=[]
     for m in recs:
         rows=prows(m)
@@ -120,8 +121,7 @@ def build_date_payload(date8):
         s=sseq(rows); d=detect(s)
         if d is None: continue
         dd,L,smin,start=d
-        ft=m.get("final_total_corners")
-        try: fin=int(ft)
+        try: fin=int(m.get(fin_key))
         except (TypeError,ValueError): fin=None
         it=dict(ID=str(m.get("match_id")), home=m.get("home_team_name",""), away=m.get("away_team_name",""),
                 dir=("上" if dd>0 else "下"), interval=f"{start:g}->{L:g}", smin=smin, L=L,
@@ -136,9 +136,8 @@ def build_date_payload(date8):
         Xb=_pad(batch)
         for c in (5,6): Xb[...,c]=(Xb[...,c]-mu[c])/sd[c]
         Pb=mdl.predict(Xb,verbose=0,batch_size=512).ravel()
-        for (ii,tobs),p in zip(idxmap,Pb): items[ii]["P"][str(tobs)]=round(float(p),3)
+        for (ii,tobs),pp in zip(idxmap,Pb): items[ii]["P"][str(tobs)]=round(float(pp),3)
     items=[it for it in items if it["P"]]
-    # 各时刻整体
     agg={}
     for t in TOBS:
         ac=hh=tp=0
@@ -149,9 +148,68 @@ def build_date_payload(date8):
                 ac+=1; hh+=(_correct(it["fin"],it["L"],side) or 0)
         agg[str(t)]=dict(pred=tp, acted=ac, hit=hh, acc=(round(hh/ac,4) if ac else None))
     items.sort(key=lambda x:x["smin"])
-    payload=dict(date=date8, tobs=TOBS, count=len(items), items=items, agg=agg)
-    _CACHE[date8]=payload
-    return payload
+    return dict(date=date8, tobs=TOBS, count=len(items), items=items, agg=agg)
+
+def build_date_payload(date8):
+    if date8 in _CACHE: return _CACHE[date8]
+    mdl,mu,sd=_model(); by=_load_monthly()
+    pl=_build_payload(date8, by.get(date8,[]), mdl, mu, sd, "final_total_corners")
+    _CACHE[date8]=pl; return pl
+
+def _load_goal_by_date():
+    global _GBYDATE
+    with _GDL:
+        if _GBYDATE is None:
+            by=collections.defaultdict(dict)
+            for m in load_jsonl(GOAL_FILE):
+                d=str(m.get("date","")); mid=str(m.get("match_id","")).strip()
+                if len(d)!=8 or not d.isdigit() or not mid: continue
+                cur=by[d].get(mid)
+                if cur is None or len(m.get("market_rows") or [])>len(cur.get("market_rows") or []):
+                    by[d][mid]=m
+            _GBYDATE={d:list(v.values()) for d,v in by.items()}
+            print(f"[goal-data] {len(_GBYDATE)} dates from goal file", flush=True)
+    return _GBYDATE
+
+def _goal_model():
+    """进球模型: 启动时在进球数据(<GOAL_TRAIN_CUT)上训练一次 GRU, 缓存内存。"""
+    global _GMDL,_GMU,_GSD
+    with _GLOCK:
+        if _GMDL is None:
+            os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL","3")
+            import tensorflow as tf; tf.get_logger().setLevel("ERROR")
+            by=_load_goal_by_date(); Xl=[];Y=[]
+            for d in sorted(by):
+                if d>=GOAL_TRAIN_CUT: continue
+                for m in by[d]:
+                    rows=prows(m)
+                    if len(rows)<3: continue
+                    s=sseq(rows); dd=detect(s)
+                    if dd is None: continue
+                    di,L,smin,start=dd
+                    try: fin=int(m.get("final_total_goals"))
+                    except (TypeError,ValueError): continue
+                    f=feat(s,di,L,smin,85)
+                    if f is None: continue
+                    Xl.append(f); Y.append(1 if((di>0 and fin<L)or(di<0 and fin>L)) else 0)
+            X=_pad(Xl); Y=np.array(Y)
+            _GMU=X.reshape(-1,X.shape[2]).mean(0); _GSD=X.reshape(-1,X.shape[2]).std(0)+1e-6
+            Xn=X.copy()
+            for c in (5,6): Xn[...,c]=(Xn[...,c]-_GMU[c])/_GSD[c]
+            inp=tf.keras.Input((MAXLEN,X.shape[2])); x=tf.keras.layers.Masking()(inp)
+            x=tf.keras.layers.GRU(48)(x); x=tf.keras.layers.Dense(32,activation="relu")(x)
+            out=tf.keras.layers.Dense(1,activation="sigmoid")(x)
+            g=tf.keras.Model(inp,out); g.compile(optimizer=tf.keras.optimizers.Adam(1e-3),loss="binary_crossentropy")
+            g.fit(Xn,Y,validation_split=0.1,epochs=25,batch_size=256,verbose=0)
+            _GMDL=g
+            print(f"[goal-model] trained on {len(X)} staircase samples (train<{GOAL_TRAIN_CUT})", flush=True)
+    return _GMDL,_GMU,_GSD
+
+def build_goal_date_payload(date8):
+    if date8 in _GCACHE: return _GCACHE[date8]
+    mdl,mu,sd=_goal_model(); by=_load_goal_by_date()
+    pl=_build_payload(date8, by.get(date8,[]), mdl, mu, sd, "final_total_goals")
+    _GCACHE[date8]=pl; return pl
 
 def build_live_payload(force=False):
     """抓当前进行中标的 -> 阶梯检测 + GRU(截止=当前分钟) 推理。复用本模块 feat/_dec/归一化。"""
@@ -263,6 +321,8 @@ th{background:#f1f6fd;color:#113a63;position:sticky;top:0;z-index:2}.note{color:
 .pill{display:inline-flex;align-items:center;padding:1px 7px;border-radius:999px;border:1px solid #d2deea;background:#f6f9fd;font-size:12px;line-height:1.5}
 .row-good{background:#ecfaf3}.row-warn{background:#fff7ea}.row-hold{background:#f7f8fa}
 .badge-anom{background:#c0392b;color:#fff;padding:1px 6px;border-radius:4px;font-size:11px;margin-left:4px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px}.lg{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;border:1px solid #d4deea;background:#fff}.dot{width:10px;height:10px;border-radius:999px;display:inline-block}.tip{font-size:12px;color:#586174;margin-top:6px;line-height:1.6}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}.signal-card{border:1px solid #dbe5f1;border-radius:14px;background:#fff;box-shadow:0 6px 16px rgba(15,23,42,.05);overflow:hidden}.signal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:12px 14px;border-bottom:1px solid #e6edf5;background:linear-gradient(120deg,#fbfdff 0%,#f5faff 100%)}.signal-main{display:flex;flex-direction:column;gap:4px}.signal-title{font-weight:700;color:#0f3558;line-height:1.35}.signal-sub{font-size:11px;color:#6b7280;line-height:1.5}.signal-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;border:1px solid #d2deea;background:#f6f9fd;white-space:nowrap}.signal-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}.mini-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;border:1px solid #d2deea;background:#fff;font-size:11px;font-weight:700;white-space:nowrap}.mini-good{background:#ecfaf3;color:#0b8f55;border-color:#b8e6d2}.mini-warn{background:#fff7ea;color:#b66a00;border-color:#f4d7a8}.mini-hold{background:#f4f6f8;color:#5b677a;border-color:#d7dfe8}.mini-anom{background:#fff0f0;color:#c0392b;border-color:#f3c0c0}.signal-body{padding:12px 14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.kv{border:1px solid #e5edf5;border-radius:10px;padding:8px 10px;background:#fbfdff}.kv-k{font-size:11px;color:#6b7280;letter-spacing:.3px;text-transform:uppercase}.kv-v{margin-top:4px;font-size:14px;font-weight:700;color:#172554;line-height:1.35}.signal-foot{padding:10px 14px;border-top:1px solid #e6edf5;background:#fafcff;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}.signal-note{font-size:12px;color:#5b677a;line-height:1.55}
 caption{font-weight:700;margin:8px}
 @media (max-width:800px){h1{font-size:17px}.tab{padding:6px 10px}}
 </style></head><body><div class=wrap><section class=panel>
@@ -297,13 +357,17 @@ async function initDates(){
 async function go(){
   var ymd=pick();if(!/^\d{8}$/.test(ymd)){alert('请选择日期');return;}
   document.getElementById('sel').value=ymd;
-  var out=document.getElementById('out');out.textContent='推理中… ('+ymd+')';
-  try{var r=await fetch('/api/gru/by-date?date='+ymd);var j=await r.json();out.innerHTML=render(j);}
-  catch(e){out.innerHTML='<div class=note>加载失败: '+esc(e)+'</div>';}
+  var out=document.getElementById('out');out.textContent='推理中… ('+ymd+') 角球+进球…';
+  try{
+    var rr=await Promise.all([fetch('/api/gru/by-date?date='+ymd),fetch('/api/gru/goal-by-date?date='+ymd)]);
+    var jc=await rr[0].json(), jg=await rr[1].json();
+    out.innerHTML=render(jc,'🚩 角球')+'<hr style="border:none;border-top:2px solid #2b6cb0;margin:26px 0">'+render(jg,'⚽ 进球(比分)');
+  }catch(e){out.innerHTML='<div class=note>加载失败: '+esc(e)+'</div>';}
 }
-function render(j){
+function render(j,label){
+  if(j&&j.error)return '<div class=note>'+(label||'')+' 加载失败: '+esc(j.error)+'</div>';
   var T=j.tobs;var y=j.date.slice(0,4),m=j.date.slice(4,6),d=j.date.slice(6,8);
-  var h='<h2 style="font-size:16px">'+y+'-'+m+'-'+d+' · 形成阶梯 '+j.count+' 条</h2>';
+  var h='<h2 style="font-size:16px">'+(label?label+' · ':'')+y+'-'+m+'-'+d+' · 形成阶梯 '+j.count+' 条</h2>';
   h+='<table><caption>各固定时刻整体决策正确率(越晚越准)</caption><tr><th>指标</th>';
   T.forEach(function(t){h+='<th>'+t+'′</th>';});h+='</tr><tr><td>正确率</td>';
   T.forEach(function(t){var a=j.agg[t];h+=a&&a.acc!=null?('<td><b>'+(a.acc*100).toFixed(0)+'%</b><br><span style="font-size:11px;color:#555">'+a.acted+'手/'+a.hit+'中</span></td>'):'<td>—</td>';});
@@ -355,18 +419,45 @@ function renderLive(j){
         '<div class=meta-card><div class=meta-k>可执行建议</div><div class=meta-v>'+act+'</div></div>'+
         '<div class=meta-card><div class=meta-k>异常预警</div><div class=meta-v>'+anm+'</div></div>'+
         '</div>';
+    h+='<div class=legend>'+
+      '<span class="lg"><span class=dot style="background:#0b8f55"></span>信原判: 建议按初判方向</span>'+
+      '<span class="lg"><span class=dot style="background:#b66a00"></span>反手: 建议反向</span>'+
+      '<span class="lg"><span class=dot style="background:#5b677a"></span>弃权: 观望</span>'+
+      '<span class="lg"><span class=dot style="background:#c0392b"></span>异常: 后段位移偏大</span>'+
+      '</div>';
+    h+='<div class=tip>读法: 先看颜色，再看 P(成立) 和 建议方向。绿色表示模型更支持初判；橙色表示模型更支持反向；灰色表示不建议出手。若同一行带红边或“异常”，说明后段盘口继续朝阶梯方向移动较多，优先考虑对冲或弃权。</div>';
     if(!n){return h+'<div class=note>当前无高置信实时预测（无进行中标的 / 未形成阶梯 / 数据源不可达）。'+(j.note?('<br>'+esc(j.note)):'')+'</div>';}
-    h+='<div class=live-wrap><table><tr><th>ID</th><th>比赛信息</th><th>当前</th><th>梯</th><th>锚线</th><th>初判</th><th>P(成立)</th><th>决策</th><th>建议方向</th><th>后段位移/异常</th></tr>';
-  j.signals.forEach(function(s){
-        var cls=s.act=='信原判'?'row-good':(s.act=='反手'?'row-warn':'row-hold');
-    var adv=s.side==null?'弃权观望':((s.side=='over'?'高于 ':'低于 ')+s.line);
-    var badge=s.anomaly?' <span style="background:#c0392b;color:#fff;padding:1px 5px;border-radius:4px">异常</span>':'';
-        var lg=esc(s.league||'-'); var ko=esc(s.kickoff||'-'); var sc=esc(s.score||'-');
-        var main='<div class=match-main><div class=match-title>'+esc(s.home)+' vs '+esc(s.away)+'</div>'+
-            '<div class=match-sub>联赛: '+lg+' | 开赛: '+ko+' | 比分: '+sc+'</div></div>';
-        h+='<tr class='+cls+'><td><span class=pill>'+esc(s.match_id)+'</span></td><td>'+main+'</td><td>'+s.minute+'′</td><td>'+esc(s.stair)+'</td><td>'+s.line+'</td><td>'+(s.tent=='under'?'低':'高')+'</td><td><b>'+(s.P==null?'—':s.P.toFixed(2))+'</b></td><td><b>'+esc(s.act||'—')+'</b></td><td><b>'+esc(adv)+'</b></td><td>'+s.overshoot+(s.anomaly?'<span class=badge-anom>异常</span>':'')+'</td></tr>';
-  });
-    return h+'</table></div><div class=note>绿=信原判 橙=反手 灰=弃权。截止时刻=每场当前分钟。异常=出手后线继续朝阶梯方向 overshoot≥2。仅策略验证，非投注建议。</div>';
+        h+='<div class=card-grid>';
+    j.signals.forEach(function(s){
+                var cls=s.act=='信原判'?'row-good':(s.act=='反手'?'row-warn':'row-hold');
+        var adv=s.side==null?'弃权观望':((s.side=='over'?'高于 ':'低于 ')+s.line);
+        var badge=s.anomaly?'<span class=badge-anom>异常</span>':'';
+                var lg=esc(s.league||'-'); var ko=esc(s.kickoff||'-'); var sc=esc(s.score||'-');
+                var pText=s.P==null?'—':s.P.toFixed(2);
+                var pChipCls=s.act=='信原判'?'mini-good':(s.act=='反手'?'mini-warn':'mini-hold');
+                var pChipTxt=s.act=='信原判'?'高置信':(s.act=='反手'?'反向':'观望');
+                var anomChip=s.anomaly?'<span class="mini-chip mini-anom">异常</span>':'';
+                var dirChip='<span class="mini-chip '+pChipCls+'">'+pChipTxt+'</span>';
+                var probChip='<span class="mini-chip '+pChipCls+'">P '+pText+'</span>';
+                var mainTitle=esc(s.home)+' vs '+esc(s.away);
+                var intent=s.act=='信原判'?'信原判':(s.act=='反手'?'反手':'弃权');
+                h+='<div class="signal-card '+cls+'" style="'+(s.anomaly?'border-left:5px solid #c0392b;':'')+'">'+
+                        '<div class=signal-head><div class=signal-main><div class=signal-title><span class=pill>'+esc(s.match_id)+'</span> '+mainTitle+'</div>'+
+                                '<div class=signal-sub>联赛: '+lg+' | 开赛: '+ko+' | 比分: '+sc+'</div></div>'+
+                                '<div class=signal-chips><span class="signal-badge" style="background:'+(s.act=='信原判'?'#ecfaf3':(s.act=='反手'?'#fff7ea':'#f4f6f8'))+';color:'+(s.act=='信原判'?'#0b8f55':(s.act=='反手'?'#b66a00':'#5b677a'))+'">'+intent+'</span>'+probChip+dirChip+anomChip+'</div></div>'+
+                                '<div class=signal-body>'+
+                            '<div class=kv><div class=kv-k>当前</div><div class=kv-v>'+s.minute+'′</div></div>'+
+                            '<div class=kv><div class=kv-k>阶梯 / 锚线</div><div class=kv-v>'+esc(s.stair)+' · '+s.line+'</div></div>'+
+                            '<div class=kv><div class=kv-k>初判</div><div class=kv-v>'+(s.tent=='under'?'低':'高')+'</div></div>'+
+                            '<div class=kv><div class=kv-k>P(成立)</div><div class=kv-v>'+pText+'</div></div>'+
+                            '<div class=kv><div class=kv-k>决策</div><div class=kv-v>'+esc(s.act||'—')+'</div></div>'+
+                            '<div class=kv><div class=kv-k>建议方向</div><div class=kv-v>'+esc(adv)+'</div></div>'+
+                            '<div class=kv style="grid-column:1 / -1"><div class=kv-k>后段位移</div><div class=kv-v>'+s.overshoot+(s.anomaly?' · 异常':'')+'</div></div>'+
+                        '</div>'+
+                        '<div class=signal-foot><span class=signal-note>绿=信原判 橙=反手 灰=弃权</span><span class=signal-note>仅策略验证，非投注建议</span></div>'+
+                    '</div>';
+    });
+        return h+'</div><div class=note>绿色卡片表示模型更支持初判方向；橙色卡片表示模型更支持反向；灰色卡片表示观望。若卡片左侧有红边或“异常”，说明后段盘口继续朝阶梯方向移动较多，优先考虑对冲或弃权。</div>';
 }
 initDates();showTab('hist');
 </script></section></div></body></html>"""
@@ -381,7 +472,8 @@ class H(SimpleHTTPRequestHandler):
         if path=="/" or path=="/index.html":
             return self._send(200, FRONT, "text/html; charset=utf-8")
         if path=="/api/gru/dates":
-            return self._send(200, json.dumps({"dates":sorted(_load_monthly().keys())}), "application/json; charset=utf-8")
+            ds=set(_load_monthly().keys())|set(_load_goal_by_date().keys())
+            return self._send(200, json.dumps({"dates":sorted(ds)}), "application/json; charset=utf-8")
         if path=="/api/gru/live":
             force_raw=((q.get("force") or [""])[0] or "").strip().lower()
             # Backward-compatible guard: only force=hard bypasses cache.
@@ -390,10 +482,11 @@ class H(SimpleHTTPRequestHandler):
             except Exception as e:
                 return self._send(500, json.dumps({"error":str(e)}), "application/json; charset=utf-8")
             return self._send(200, json.dumps(pl, ensure_ascii=False), "application/json; charset=utf-8")
-        if path=="/api/gru/by-date":
+        if path in ("/api/gru/by-date","/api/gru/goal-by-date"):
             d=_norm_date((q.get("date") or [""])[0])
             if not d: return self._send(400, json.dumps({"error":"bad date"}), "application/json; charset=utf-8")
-            try: pl=build_date_payload(d)
+            fn=build_goal_date_payload if path.endswith("goal-by-date") else build_date_payload
+            try: pl=fn(d)
             except Exception as e:
                 return self._send(500, json.dumps({"error":str(e)}), "application/json; charset=utf-8")
             return self._send(200, json.dumps(pl, ensure_ascii=False), "application/json; charset=utf-8")
@@ -405,7 +498,7 @@ def main():
     p.add_argument("--host", default=HOST); p.add_argument("--port", type=int, default=PORT)
     p.add_argument("--warmup", action="store_true", help="启动即加载模型+数据")
     a=p.parse_args()
-    if a.warmup: _model(); _load_monthly()
+    if a.warmup: _model(); _load_monthly(); _goal_model()
     srv=ThreadingHTTPServer((a.host,a.port), H)
     print(f"Dashboard: http://{a.host}:{a.port}/", flush=True)
     print(f"API by-date: http://{a.host}:{a.port}/api/gru/by-date?date=20260802", flush=True)
