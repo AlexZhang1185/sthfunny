@@ -525,6 +525,77 @@
       setStatus(`更新时间: ${generated} | ${note}`);
     }
 
+    function renderSegmentRecommendations(payload) {
+      const segmentSection = document.getElementById("segmentSection");
+      const segmentCards = document.getElementById("segmentCards");
+      const segmentPredictions = payload?.segment_predictions || [];
+
+      if (!segmentSection || !segmentCards) return;
+
+      if (segmentPredictions.length > 0) {
+        segmentSection.style.display = "block";
+        segmentCards.innerHTML = "";
+
+        segmentPredictions.forEach((seg) => {
+          const card = document.createElement("div");
+          card.className = "panel";
+          card.style.padding = "12px";
+          card.style.boxShadow = "0 4px 12px rgba(15,23,42,0.08)";
+
+          const correctCount = seg.rows.filter((r) => r.is_finished && r.pred_side &&
+            ((r.pred_side === "under" && r.final_total_corners < r.line) ||
+             (r.pred_side === "over" && r.final_total_corners > r.line))
+          ).length;
+          const totalCount = seg.rows.filter((r) => r.is_finished).length;
+          const winRate = totalCount > 0 ? (correctCount / totalCount * 100).toFixed(1) : "-";
+
+          let headerHtml = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--line);">
+              <div style="font-weight: 700; color: var(--head); font-size: 15px;">🔒 ${seg.segment} 分钟</div>
+              <div style="font-size: 12px; color: var(--muted);">
+                ${seg.match_count} 个信号${seg.hist_accuracy != null ? ` | 历史正确率 ${(seg.hist_accuracy * 100).toFixed(1)}%` : ""}
+                ${totalCount > 0 ? ` | 本样本胜率 ${winRate}%` : ""}
+              </div>
+            </div>
+            <div style="font-size: 12px; line-height: 1.6;">
+          `;
+
+          let rowsHtml = "";
+          seg.rows.forEach((r) => {
+            const resultBadge = r.is_finished && r.pred_side ?
+              (r.pred_side === "under" && r.final_total_corners < r.line) ? '<span style="color: #0b8f55; font-weight: 700;">✅</span>' :
+              (r.pred_side === "over" && r.final_total_corners > r.line) ? '<span style="color: #0b8f55; font-weight: 700;">✅</span>' :
+              r.final_total_corners == r.line ? '<span style="color: #5b677a;">⚖️</span>' :
+              '<span style="color: #b66a00; font-weight: 700;">❌</span>' : '';
+
+            const finalText = r.is_finished ? ` (终场${r.final_total_corners}球)` : '';
+            const leagueText = r.league_name ? escHtml(r.league_name) : "-";
+            const matchIdText = r.match_id ? escHtml(String(r.match_id)) : "-";
+            const kickoffText = r.kickoff_time ? escHtml(r.kickoff_time) : "-";
+            const scoreText = r.current_score ? escHtml(r.current_score) : "-";
+            const cornerScoreText = r.current_corner_score ? escHtml(r.current_corner_score) : "-";
+
+            rowsHtml += `
+              <div style="margin-bottom: 6px; padding: 4px 0; border-bottom: 1px dashed #eee;">
+                <div style="font-weight: 500;">${r.home_team_name} vs ${r.away_team_name} ${resultBadge} <span style="font-size: 11px; color: var(--muted);">#${matchIdText}</span></div>
+                <div style="font-size: 11px; color: var(--muted);">
+                  联赛 ${leagueText} | 时间 ${kickoffText} | 比分 ${scoreText} | 角球 ${cornerScoreText}
+                </div>
+                <div style="font-size: 11px; color: var(--muted);">
+                  ${r.trigger_minute}' 触发 ${r.pred_side} ${r.line} | 置信度 ${(r.pred_prob * 100).toFixed(1)}%${finalText}
+                </div>
+              </div>
+            `;
+          });
+
+          card.innerHTML = headerHtml + rowsHtml + "</div>";
+          segmentCards.appendChild(card);
+        });
+      } else {
+        segmentSection.style.display = "none";
+      }
+    }
+
     async function fetchJson(url, timeoutMs = 30000) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);

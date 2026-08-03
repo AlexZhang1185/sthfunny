@@ -490,10 +490,18 @@
               '<span style="color: #b66a00; font-weight: 700;">❌</span>' : '';
 
             const finalText = r.is_finished ? ` (终场${r.final_total_corners}球)` : '';
+            const leagueText = r.league_name ? escHtml(r.league_name) : "-";
+            const matchIdText = r.match_id ? escHtml(String(r.match_id)) : "-";
+            const kickoffText = r.kickoff_time ? escHtml(r.kickoff_time) : "-";
+            const scoreText = r.current_score ? escHtml(r.current_score) : "-";
+            const cornerScoreText = r.current_corner_score ? escHtml(r.current_corner_score) : "-";
 
             rowsHtml += `
               <div style="margin-bottom: 6px; padding: 4px 0; border-bottom: 1px dashed #eee;">
-                <div style="font-weight: 500;">${r.home_team_name} vs ${r.away_team_name} ${resultBadge}</div>
+                <div style="font-weight: 500;">${r.home_team_name} vs ${r.away_team_name} ${resultBadge} <span style="font-size: 11px; color: var(--muted);">#${matchIdText}</span></div>
+                <div style="font-size: 11px; color: var(--muted);">
+                  联赛 ${leagueText} | 时间 ${kickoffText} | 比分 ${scoreText} | 角球 ${cornerScoreText}
+                </div>
                 <div style="font-size: 11px; color: var(--muted);">
                   ${r.trigger_minute}' 触发 ${r.pred_side} ${r.line} | 置信度 ${(r.pred_prob * 100).toFixed(1)}%${finalText}
                 </div>
@@ -621,7 +629,7 @@
       const date = toYYYYMMDD(document.getElementById("dateInput").value);
       const url = `/api/live/current?date=${encodeURIComponent(date || "")}`;
       setStatus("正在刷新当前进行中比赛...");
-      const payload = await fetchJson(url, 12000);
+      const payload = await fetchJson(url, 120000);
       render(payload, "current-live");
     }
 
