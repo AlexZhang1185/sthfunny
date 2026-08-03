@@ -26,6 +26,7 @@ jobs:
           TZ: Asia/Shanghai
           PYTHONUNBUFFERED: "1"
           CURRENT_BUDGET_S: "300"
+          PYTHONPATH: "."
         run: python strategy/generate_stairgru_live.py
       - name: Deploy static_stair -> /stairgru/
         uses: peaceiris/actions-gh-pages@v4
