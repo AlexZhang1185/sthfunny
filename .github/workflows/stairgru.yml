@@ -25,7 +25,7 @@ jobs:
         env:
           TZ: Asia/Shanghai
           PYTHONUNBUFFERED: "1"
-          CURRENT_BUDGET_S: "300"
+          CURRENT_BUDGET_S: "900"
           PYTHONPATH: "."
         run: python strategy/generate_stairgru_live.py
       - name: Deploy static_stair -> /stairgru/

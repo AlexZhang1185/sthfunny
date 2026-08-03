@@ -44,7 +44,8 @@ _CURRENT_CACHE: dict[str, dict[str, Any]] = {}
 _CURRENT_REFRESHING: set[str] = set()
 _CURRENT_LOCK = threading.Lock()
 CURRENT_CACHE_TTL_SECONDS = 45.0
-FORCE_TIME_BUDGET_S = 800.0  # 手动强制刷新的串行抓取时间预算(秒), 到点返回已抓部分, 避免前端超时空白
+DEFAULT_STEP_TIMEOUT_S = 900.0
+FORCE_TIME_BUDGET_S = 900.0  # 手动强制刷新的串行抓取时间预算(秒), 到点返回已抓部分, 避免前端超时空白
 LIVE_REFRESH_SNAPSHOT_DIR = "data/live_refresh_snapshots"
 # 历史数据缓存
 _HISTORY_CACHE: dict[str, dict[str, Any]] = {}  # 按日期缓存预测结果
@@ -293,8 +294,7 @@ def _build_segment_predictions(records: list[dict], model_bundle: dict, latch: b
 def _build_current_live_payload(date_yyyymmdd: str | None = None, time_budget_s: float | None = None) -> dict[str, Any]:
     date_str = date_yyyymmdd or datetime.now().strftime("%Y%m%d")
     try:
-        # 延长超时时间到30秒，适配海外网络环境
-        feed_text = fetch_oldindexall_feed_text(timeout_s=12.0)
+        feed_text = fetch_oldindexall_feed_text(timeout_s=DEFAULT_STEP_TIMEOUT_S)
         live_matches = extract_live_matches_from_feed(feed_text)
         live_ids = [x["match_id"] for x in live_matches]
     except Exception as e:
@@ -316,7 +316,7 @@ def _build_current_live_payload(date_yyyymmdd: str | None = None, time_budget_s:
         date_str=date_str,
         out_jsonl=RAW_OUTPUT_NOW,
         company_id=8,
-        timeout_s=8.0,
+        timeout_s=DEFAULT_STEP_TIMEOUT_S,
         retries=1,
         backoff_s=0.3,
         time_budget_s=time_budget_s,
@@ -427,8 +427,7 @@ def _get_current_live_cached_or_start(date_str: str, allow_background_refresh: b
         )
 
     try:
-        # 延长超时时间到20秒，适配海外网络环境
-        feed_text = fetch_oldindexall_feed_text(timeout_s=4.0)
+        feed_text = fetch_oldindexall_feed_text(timeout_s=DEFAULT_STEP_TIMEOUT_S)
         live_matches = extract_live_matches_from_feed(feed_text)
     except Exception:
         live_matches = []
@@ -495,7 +494,7 @@ def _build_rows_payload_from_match_ids(date_str: str, match_ids: list[str], sour
             date_str=date_str,
             out_jsonl=tmp_path,
             company_id=8,
-            timeout_s=8.0,
+            timeout_s=DEFAULT_STEP_TIMEOUT_S,
             retries=1,
             backoff_s=0.3,
         )

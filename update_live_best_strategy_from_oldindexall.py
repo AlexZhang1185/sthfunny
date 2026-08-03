@@ -31,7 +31,7 @@ def _build_headers() -> dict[str, str]:
     }
 
 
-def fetch_oldindexall_feed_text(timeout_s: float = 20.0) -> str:
+def fetch_oldindexall_feed_text(timeout_s: float = 900.0) -> str:
     r_value = f"007{int(time.time())}000"
     url = f"{OLDINDEXALL_FEED}?r={r_value}"
     resp = requests.get(url, headers=_build_headers(), timeout=timeout_s)
@@ -782,7 +782,7 @@ def main() -> None:
     ap.add_argument("--date", default=datetime.now().strftime("%Y%m%d"), help="Date used for output records")
     ap.add_argument("--company-id", type=int, default=8)
     ap.add_argument("--workers", type=int, default=1)
-    ap.add_argument("--timeout-s", type=float, default=12.0)
+    ap.add_argument("--timeout-s", type=float, default=900.0)
     ap.add_argument("--retries", type=int, default=2)
     ap.add_argument("--backoff-s", type=float, default=0.35)
     ap.add_argument("--model", default="data/settlement_relation_model/settlement_relation_model.joblib")

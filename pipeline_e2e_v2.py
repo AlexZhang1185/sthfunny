@@ -790,7 +790,7 @@ def inspect_single_match_anchor_trend(
     match_id: str,
     date_yyyymmdd: str,
     company_id: int = 8,
-    timeout_s: float = 12.0,
+    timeout_s: float = 900.0,
     min_anchor_minute: int = 46,
     max_anchor_minute: int = 75,
     min_anchor_corners: int = 5,
@@ -1129,7 +1129,7 @@ class TitanCornerClient:
     def __init__(
         self,
         headers: Optional[dict[str, str]] = None,
-        timeout_s: float = 12.0,
+        timeout_s: float = 900.0,
         max_retries: int = 3,
         backoff_s: float = 0.35,
         jitter_s: tuple[float, float] = (0.0, 0.12),
@@ -1509,7 +1509,7 @@ def crawl_raw(
     out_jsonl: str,
     company_id: int = 8,
     workers: int = 1,
-    timeout_s: float = 12.0,
+    timeout_s: float = 900.0,
     retries: int = 3,
     backoff_s: float = 0.35,
     request_jitter_s: tuple[float, float] = (1.8, 3.8),
@@ -1665,7 +1665,7 @@ def crawl_raw_from_match_ids(
     out_jsonl: str,
     company_id: int = 8,
     workers: int = 1,
-    timeout_s: float = 12.0,
+    timeout_s: float = 900.0,
     retries: int = 3,
     backoff_s: float = 0.35,
     request_jitter_s: tuple[float, float] = (1.8, 3.8),
@@ -2062,7 +2062,7 @@ def predict_match(
     model_path: str,
     company_id: int = 8,
     minute: Optional[int] = None,
-    timeout_s: float = 12.0,
+    timeout_s: float = 900.0,
 ) -> dict[str, Any]:
     if joblib is None:
         raise RuntimeError("joblib not available; install joblib / scikit-learn")
@@ -2258,7 +2258,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p_crawl.add_argument("--out", default="data/raw_matches.jsonl")
     p_crawl.add_argument("--company", type=int, default=8)
     p_crawl.add_argument("--workers", type=int, default=1)
-    p_crawl.add_argument("--timeout", type=float, default=12.0)
+    p_crawl.add_argument("--timeout", type=float, default=900.0)
     p_crawl.add_argument("--retries", type=int, default=3)
     p_crawl.add_argument("--backoff", type=float, default=1.2)
     p_crawl.add_argument("--sleep-min", type=float, default=1.8)
@@ -2285,7 +2285,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p_pr.add_argument("--model", default="data/model_over_line.joblib")
     p_pr.add_argument("--company", type=int, default=8)
     p_pr.add_argument("--minute", type=int, default=None)
-    p_pr.add_argument("--timeout", type=float, default=12.0)
+    p_pr.add_argument("--timeout", type=float, default=900.0)
 
     p_rule = sub.add_parser("discover-rules")
     p_rule.add_argument("--dataset", default="data/dataset.csv")
@@ -2324,7 +2324,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p_inspect.add_argument("--match", required=True)
     p_inspect.add_argument("--date", required=True, help="YYYYMMDD")
     p_inspect.add_argument("--company", type=int, default=8)
-    p_inspect.add_argument("--timeout", type=float, default=12.0)
+    p_inspect.add_argument("--timeout", type=float, default=900.0)
     p_inspect.add_argument("--min-anchor-minute", type=int, default=46)
     p_inspect.add_argument("--max-anchor-minute", type=int, default=75)
     p_inspect.add_argument("--min-anchor-corners", type=int, default=5)

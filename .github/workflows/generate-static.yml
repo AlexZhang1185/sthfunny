@@ -34,7 +34,7 @@ jobs:
         env:
           TZ: Asia/Shanghai
           PYTHONUNBUFFERED: 1
-          CURRENT_BUDGET_S: "840"   # current 抓取时间预算14分钟, 抓完全部场次(仍<retry的15分钟), 到点才返回已抓部分
+          CURRENT_BUDGET_S: "900"   # current 抓取时间预算15分钟, 到点才返回已抓部分
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

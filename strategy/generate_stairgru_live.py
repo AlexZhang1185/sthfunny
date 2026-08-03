@@ -10,7 +10,8 @@ from update_live_best_strategy_from_oldindexall import (
 from pipeline_e2e_v2 import load_jsonl
 
 MODELDIR="strategy/model"; OUTDIR="static_stair"; T_STAIR=40; MAXLEN=40
-BUDGET=float(os.environ.get("CURRENT_BUDGET_S","300")); ANOM_D=2.0
+DEFAULT_STEP_TIMEOUT_S=900.0
+BUDGET=float(os.environ.get("CURRENT_BUDGET_S","900")); ANOM_D=2.0
 
 def sseq(rows):
     s=[rows[0]] if rows else []
@@ -65,14 +66,14 @@ def build_signals():
     import tensorflow as tf; tf.get_logger().setLevel("ERROR")
     st=np.load(os.path.join(MODELDIR,"stats.npz")); mu=st["mu"]; sd=st["sd"]
     mdl=tf.keras.models.load_model(os.path.join(MODELDIR,"gru.keras"))
-    feed=fetch_oldindexall_feed_text(timeout_s=12.0)
+    feed=fetch_oldindexall_feed_text(timeout_s=DEFAULT_STEP_TIMEOUT_S)
     lm=extract_live_matches_from_feed(feed)
     ids=[str(x.get("match_id")) for x in lm if x.get("match_id")]
     teams={str(x.get("match_id")):(x.get("home_team_name",""),x.get("away_team_name","")) for x in lm}
     if not ids: return empty("当前无进行中标的(feed为空)")
     out_jsonl=os.path.join(OUTDIR,"_live_raw.jsonl")
     crawl_live_matches_from_ids(ids, datetime.now().strftime("%Y%m%d"), out_jsonl,
-                                company_id=8, timeout_s=8.0, retries=1, backoff_s=0.3, time_budget_s=BUDGET)
+                                company_id=8, timeout_s=DEFAULT_STEP_TIMEOUT_S, retries=1, backoff_s=0.3, time_budget_s=BUDGET)
     recs=load_jsonl(out_jsonl)
     sigs=[]
     for m in recs:
