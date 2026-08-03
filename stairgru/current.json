@@ -1,5 +1,22 @@
 {
-  "generated_at": "2026-08-03T07:06:57Z",
-  "note": "当前无进行中标的(feed为空)",
-  "signals": []
+  "generated_at": "2026-08-03T12:47:23Z",
+  "note": "",
+  "feed_count": 12,
+  "signals": [
+    {
+      "match_id": "3054138",
+      "home": "瓜拉尼后备队",
+      "away": "自由队后备队",
+      "minute": 54,
+      "stair": "下",
+      "line": 7.5,
+      "tent": "over",
+      "P": 0.998,
+      "act": "信原判",
+      "side": "over",
+      "overshoot": 1.5,
+      "anomaly": false,
+      "seg": "0-15"
+    }
+  ]
 }
