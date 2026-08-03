@@ -69,7 +69,16 @@ def build_signals():
     feed=fetch_oldindexall_feed_text(timeout_s=DEFAULT_STEP_TIMEOUT_S)
     lm=extract_live_matches_from_feed(feed)
     ids=[str(x.get("match_id")) for x in lm if x.get("match_id")]
-    teams={str(x.get("match_id")):(x.get("home_team_name",""),x.get("away_team_name","")) for x in lm}
+    meta={
+        str(x.get("match_id")):{
+            "home":x.get("home_team_name","") or x.get("home_team_feed",""),
+            "away":x.get("away_team_name","") or x.get("away_team_feed",""),
+            "league":x.get("league_name","") or "",
+            "kickoff":x.get("kickoff_time","") or "",
+            "score":x.get("current_score","") or "",
+        }
+        for x in lm if x.get("match_id")
+    }
     if not ids: return empty("当前无进行中标的(feed为空)")
     out_jsonl=os.path.join(OUTDIR,"_live_raw.jsonl")
     crawl_live_matches_from_ids(ids, datetime.now().strftime("%Y%m%d"), out_jsonl,
@@ -92,8 +101,9 @@ def build_signals():
         else: act="弃权"; side=None
         anom = ov>=ANOM_D
         mid=str(m.get("match_id"))
-        h,a=teams.get(mid,("",""))
-        sigs.append(dict(match_id=mid, home=h or m.get("home_team_name",""), away=a or m.get("away_team_name",""),
+        mm=meta.get(mid,{})
+        sigs.append(dict(match_id=mid, home=mm.get("home") or m.get("home_team_name",""), away=mm.get("away") or m.get("away_team_name",""),
+            league=mm.get("league",""), kickoff=mm.get("kickoff",""), score=mm.get("score",""),
             minute=cur, stair=("上" if dd>0 else "下"), line=L, tent=tent, P=round(P,3),
             act=act, side=side, overshoot=round(ov,1), anomaly=bool(anom),
             seg=f"{(smin//15)*15}-{(smin//15)*15+15}"))
@@ -109,8 +119,15 @@ def render_html(data):
         badge = '<span style="background:#c0392b;color:#fff;padding:1px 6px;border-radius:4px">异常·建议对冲/弃权</span>' if s["anomaly"] else ''
         col = "#e6f7e6" if (s["act"]=="信原判") else ("#fff3e0" if s["act"]=="反手" else "#f4f4f4")
         adv = sideZh(s["side"],s["line"]) if s["side"] else "弃权观望"
+        league = html.escape(s.get("league","") or "-")
+        kickoff = html.escape(s.get("kickoff","") or "-")
+        score = html.escape(s.get("score","") or "-")
+        match_info = (
+            f'<div style="text-align:left"><div style="font-weight:700;color:#0f3558">{html.escape(s.get("home",""))} vs {html.escape(s.get("away",""))}</div>'
+            f'<div style="font-size:11px;color:#6b7280;margin-top:2px">联赛: {league} | 开赛: {kickoff} | 比分: {score}</div></div>'
+        )
         rows.append(f'<tr style="background:{col}"><td>{html.escape(str(s["match_id"]))}</td>'
-            f'<td>{html.escape(s.get("home",""))} vs {html.escape(s.get("away",""))}</td>'
+            f'<td>{match_info}</td>'
             f'<td>{s["minute"]}′</td><td>{s["stair"]}</td><td>{s["line"]:g}</td>'
             f'<td>{"低于" if s["tent"]=="under" else "高于"}</td><td><b>{s["P"]:.2f}</b></td>'
             f'<td><b>{s["act"]}</b></td><td><b>{adv}</b></td><td>{s["overshoot"]:g} {badge}</td></tr>')
@@ -119,15 +136,15 @@ def render_html(data):
     doc=f"""<!doctype html><html lang=zh><head><meta charset=utf-8>
 <title>实时阶梯-GRU 高置信预测</title>
 <style>body{{font-family:-apple-system,Segoe UI,Arial;margin:20px;color:#222}}h1{{font-size:19px}}
-table{{border-collapse:collapse;width:100%;font-size:13px}}th,td{{border:1px solid #ddd;padding:6px 8px;text-align:center}}
+table{{border-collapse:collapse;width:100%;font-size:13px;min-width:1080px}}th,td{{border:1px solid #ddd;padding:6px 8px;text-align:center;vertical-align:middle}}
 th{{background:#2b6cb0;color:#fff}} .sum{{background:#eef4ff;padding:12px 16px;border-radius:8px;line-height:1.9;margin:10px 0}}
-.note{{color:#666;font-size:12px;margin-top:10px;line-height:1.7}}</style></head><body>
+.note{{color:#666;font-size:12px;margin-top:10px;line-height:1.7}} .tbl{{overflow:auto;max-height:70vh;border:1px solid #dbe3ee;border-radius:8px}}</style></head><body>
 <h1>📊 实时进行中 · 阶梯-GRU 高置信预测 <button onclick=\"location.reload()\" style=\"font-size:13px;padding:4px 12px;margin-left:10px;cursor:pointer;border:1px solid #2b6cb0;background:#fff;border-radius:6px\">🔄 手动刷新</button></h1>
 <div class=sum>更新时间(UTC): <b>{data.get('generated_at','')}</b> &nbsp;|&nbsp; 进行中标的: {data.get('feed_count','—')} &nbsp;|&nbsp; 高置信信号: <b>{len(sigs)}</b>
 {('&nbsp;|&nbsp; '+note) if note else ''}<br>
 口径: 阶梯(单步单调,≤40′成形)定初判 → GRU 输出 P(初判成立); P≥0.65 信原判 / ≤0.30 反手 / 中间弃权; overshoot≥{ANOM_D} 触发异常报警(对冲/弃权)。点击右上“手动刷新”获取最新。</div>
-<table><tr><th>ID</th><th>对阵</th><th>当前</th><th>阶梯</th><th>锚线</th><th>初判</th><th>P(成立)</th><th>决策</th><th>建议方向</th><th>后段位移/异常</th></tr>
-{body}</table>
+<div class=tbl><table><tr><th>ID</th><th>比赛信息</th><th>当前</th><th>阶梯</th><th>锚线</th><th>初判</th><th>P(成立)</th><th>决策</th><th>建议方向</th><th>后段位移/异常</th></tr>
+{body}</table></div>
 <div class=note>绿=信原判 橙=反手 灰=弃权。异常报警=出手后线继续朝阶梯方向 overshoot≥{ANOM_D},提示对冲或弃权。实时快照(CI 定时构建), 仅策略验证, 非投注建议。</div>
 </body></html>"""
     return doc
